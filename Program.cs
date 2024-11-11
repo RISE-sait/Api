@@ -1,6 +1,5 @@
 using Api.Database;
 using dotenv.net;
-using Microsoft.EntityFrameworkCore;
 
 DotEnv.Load();
 
@@ -11,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
+
 builder.Services.AddDbContext<AppDbContext>();
 
 var app = builder.Build();

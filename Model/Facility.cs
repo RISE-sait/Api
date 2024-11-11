@@ -1,8 +1,14 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Api.Model
 {
     public class Facility(string location, string name)
     {
-        public required Guid Id {get; init;}
+
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id {get; init;}
         
         public string Location { get; set; } = location;
         public string Name { get; set; } = name;

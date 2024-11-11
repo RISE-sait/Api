@@ -1,12 +1,14 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
-using Api.Model.People;
+using System.ComponentModel.DataAnnotations.Schema;
+using Api.Model.People.Customers;
 
 namespace Api.Model.Courses
 {
     public class Course(string name, DateOnly startDateTime, DateOnly endDateTime)
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id {get; init; }
         
         [Length(1, 50)]

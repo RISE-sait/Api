@@ -1,10 +1,16 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Api.Model.People
 {
-    public class Account(string name, string email, string password, string phoneNumber)
+    public abstract class Account(string name, string email)
     {
+        public Account(string name, string email, string phoneNumber) : this(name, email) {
+            PhoneNumber = phoneNumber;
+        }
+
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; init; }
 
         [EmailAddress]
@@ -13,10 +19,7 @@ namespace Api.Model.People
         [StringLength(20, MinimumLength = 1)]
         public string Name { get; set; } = name;
 
-        [StringLength(20, MinimumLength = 1)]
-        public string Password { get; private set; } = password;
-
-        public string PhoneNumber { get; set; } = phoneNumber;
+        public string? PhoneNumber { get; set; }
 
         public DateOnly CreatedAt { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public string ProfilePic { get; set; } = string.Empty;

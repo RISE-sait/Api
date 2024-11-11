@@ -34,4 +34,7 @@ services:
           target: ./
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - DATABASE_URL={DATABASE_URL}
+      - DB_URL_FOR_SERVER_ON_DOCKER_NETWORK=${DB_URL_FOR_SERVER_ON_DOCKER_NETWORK}
+      - DB_URL_FOR_SERVER_ON_LOCAL_NETWORK=${DB_URL_FOR_SERVER_ON_LOCAL_NETWORK}
+    env_file:
+      - .env

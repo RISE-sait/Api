@@ -1,6 +1,9 @@
 using Api.Model;
 using Api.Model.Courses;
 using Api.Model.People;
+using Api.Model.People.Customers;
+using Api.Model.People.Employees;
+using dotenv.net;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Database
@@ -11,45 +14,44 @@ namespace Api.Database
         public DbSet<CourseSchedule> CourseSchedules { get; init; }
         public DbSet<Family> Families { get; init; }
         public DbSet<Admin> Admins { get; init; }
+        public DbSet<SuperAdmin> SuperAdmins { get; init; }
         public DbSet<Coach> Coaches { get; init; }
         public DbSet<Customer> Customers { get; init; }
-        public DbSet<Account> IndividualAccounts { get; init; }
-        public DbSet<AthleteInfo> AthleteInfo { get; init; }
+        public DbSet<Account> Accounts { get; init; }
+
+        public DbSet<BasicAthleteInfo> BasicAthleteInfo { get; init; }
+        public DbSet<AdvancedAthleteInfo> AdvancedAthleteInfo { get; init; }
+
         public DbSet<Facility> Facilities { get; init; }
         public DbSet<FinancialInfo> FinancialInfo { get; init; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            const bool shouldUseLocalHostDb = true;
 
-            if (optionsBuilder.IsConfigured) return;
-            var dbConnectionString = Environment.GetEnvironmentVariable(
-                $"DB_URL_FOR_SERVER_ON_{(shouldUseLocalHostDb ? "LOCAL" : "DOCKER")}_NETWORK");
-            optionsBuilder.UseNpgsql(dbConnectionString);
+            var shouldUseLocal = true;
+
+            // var dbConnectionString = Environment.GetEnvironmentVariable($"DB_URL_FOR_SERVER_ON_{(shouldUseLocal ? "LOCAL" : "DOCKER")}_NETWORK");
+
+            // Console.WriteLine(dbConnectionString);
+
+            optionsBuilder.UseNpgsql($"Host={(shouldUseLocal ? "localhost" : "api_db")};Port=5432;Username=postgres;Password=root;Database=mydatabase");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Account>().Property(c => c.Id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Admin>().ToTable("Admins");
 
             modelBuilder.Entity<Coach>().ToTable("Coaches");
 
-            modelBuilder.Entity<Customer>()
-            .HasMany(c => c.FinancialInfos)
-            .WithMany(fi => fi.Customers)
-            .UsingEntity(j => j.ToTable("CustomerFinancialInfo"));
+            modelBuilder.Entity<Customer>().HasMany(c => c.FinancialInfos)
+                .WithMany(fi => fi.Customers)
+                .UsingEntity(j => j.ToTable("CustomerFinancialInfo"));
 
-            modelBuilder.Entity<Family>(entity =>
-            {
-                entity.Property(f => f.Id).ValueGeneratedOnAdd();
-
-                entity.HasMany(f => f.Members)
+            modelBuilder.Entity<Family>().HasMany(f => f.Members)
                     .WithOne(m => m.Family)
                     .HasForeignKey(m => m.FamilyId)
                     .IsRequired(false);
-            });
 
             modelBuilder.Entity<CourseSchedule>().HasKey(cs =>
                new
@@ -59,17 +61,17 @@ namespace Api.Database
                    cs.BeginTime,
                });
 
-            modelBuilder.Entity<Account>().Property(a => a.Id).ValueGeneratedOnAdd();
-
-            modelBuilder.Entity<Course>().Property(c => c.Id).ValueGeneratedOnAdd();
-
-            modelBuilder.Entity<Facility>().Property(f => f.Id).ValueGeneratedOnAdd();
-
-            modelBuilder.Entity<AthleteInfo>().HasOne(ai => ai.Customer)
-            .WithOne(c => c.AthleteInfo)
-            .HasForeignKey<AthleteInfo>(ai => ai.CustomerId)
+            modelBuilder.Entity<BasicAthleteInfo>().HasOne(ai => ai.Customer)
+            .WithOne(c => c.BasicAthleteInfo)
+            .HasForeignKey<BasicAthleteInfo>(ai => ai.CustomerId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AdvancedAthleteInfo>().HasOne(ai => ai.Customer)
+                .WithOne(c => c.AdvancedAthleteInfo)
+                .HasForeignKey<AdvancedAthleteInfo>(ai => ai.CustomerId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

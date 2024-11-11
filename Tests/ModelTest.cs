@@ -1,6 +1,9 @@
-﻿using Api.Database;
+using Api.Database;
+using Api.enums;
 using Api.Model;
-using Api.Model.People;
+using Api.Model.Courses;
+using Api.Model.People.Customers;
+using Api.Model.People.Employees;
 using Bogus;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -18,17 +21,19 @@ public class ModelTest()
 
     private static void TruncateTables(AppDbContext context)
     {
-        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"Families\" CASCADE");
-        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"AthleteInfo\" CASCADE");
-        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"CustomerFinancialInfo\" CASCADE");
-        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"FinancialInfo\" CASCADE");
-        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"CourseSchedules\" CASCADE");
+        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"Accounts\" CASCADE");
         context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"Admins\" CASCADE");
-        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"Courses\" CASCADE");
-        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"Facilities\" CASCADE");
+        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"AdvancedAthleteInfo\" CASCADE");
+        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"BasicAthleteInfo\" CASCADE");
         context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"Coaches\" CASCADE");
+        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"CourseSchedules\" CASCADE");
+        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"Courses\" CASCADE");
+        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"CustomerFinancialInfo\" CASCADE");
         context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"Customers\" CASCADE");
-        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"IndividualAccounts\" CASCADE");
+        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"Facilities\" CASCADE");
+        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"Families\" CASCADE");
+        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"FinancialInfo\" CASCADE");
+        context.Database.ExecuteSqlRaw("TRUNCATE TABLE public.\"SuperAdmins\" CASCADE");
     }
 
     private static List<Customer> GenerateCustomers(int count, List<Family>? familiesForRandPick, List<Customer.RolesEnum>? rolesForRandPick)
@@ -41,10 +46,9 @@ public class ModelTest()
                 new Customer(
                     f.Person.FullName,
                     f.Internet.Email(),
-                    f.Internet.Password(),
-                    f.Phone.PhoneNumber("##########"),
                     familiesForRandPick[new Random().Next(familiesForRandPick.Count)].Id,
-                    rolesForRandPick[new Random().Next(rolesForRandPick.Count)]
+                    rolesForRandPick[new Random().Next(rolesForRandPick.Count)],
+                    f.Phone.PhoneNumber("##########")
                 )).Generate(count);
         }
 
@@ -53,12 +57,11 @@ public class ModelTest()
                 new Customer(
                     f.Person.FullName,
                     f.Internet.Email(),
-                    f.Internet.Password(),
                     f.Phone.PhoneNumber("##########")
                 )).Generate(count);
     }
 
-    private static async Task<List<Family>> CreateFamilies(AppDbContext context, int amt)
+    private static List<Family> GenerateFamilies(int amt)
     {
         List<Family> families = [];
 
@@ -66,9 +69,6 @@ public class ModelTest()
         {
             families.Add(new Family());
         }
-
-        context.Families.AddRange(families);
-        await context.SaveChangesAsync();
 
         return families;
     }
@@ -80,26 +80,40 @@ public class ModelTest()
                 new Coach(
                     f.Person.FullName,
                     f.Internet.Email(),
-                    f.Internet.Password(),
-                    f.Phone.PhoneNumber("##########")
+                    f.Phone.PhoneNumber("##########"),
+                    f.Finance.Account()
                 )).Generate(amt);
     }
 
-    [Fact]
+    private static List<Course> GenerateCourses(int count)
+    {
+        return new Faker<Course>()
+            .CustomInstantiator(f =>
+                new Course(
+                    f.Commerce.ProductName(),
+                    DateOnly.FromDateTime(f.Date.Future()),
+                    DateOnly.FromDateTime(f.Date.Past())
+                ))
+            .Generate(count);
+    }
 
+    private static List<Admin> GenerateAdmins(int count)
+    {
+        return new Faker<Admin>().CustomInstantiator(f =>
+            new Admin(
+                f.Person.FullName,
+                f.Internet.Email(),
+                f.Phone.PhoneNumber("##########"),
+                    f.Finance.Account()
+            )).Generate(count);
+    }
+
+    [Fact]
     public async Task AddAdmin_ShouldCreateAdminInDatabase()
     {
         var options = GetDbContextOptions();
 
-        var admins = new Faker<Admin>()
-            .CustomInstantiator(f =>
-                new Admin(
-                    f.Person.FullName,
-                    f.Internet.Email(),
-                    f.Internet.Password(),
-                    f.Phone.PhoneNumber("##########")
-                ))
-            .Generate(5);
+        var admins = GenerateAdmins(5);
 
         await using (var context = new AppDbContext(options))
         {
@@ -108,27 +122,74 @@ public class ModelTest()
             await context.Admins.AddRangeAsync(admins); // Add the generated Admins to the context
             await context.SaveChangesAsync(); // Save changes to the database
 
-            var adminCount = await context.IndividualAccounts.CountAsync(); // Count the number of Admins
+            var adminCount = await context.Accounts.CountAsync(); // Count the number of Admins
             Assert.Equal(5, adminCount); // Ensure there are exactly 5 Admins
         }
     }
 
     [Fact]
-    public async Task AddCustomer_ShouldCreateCustomerInDatabase_No_Family()
+    public async Task AddFinancialInfo_ShouldCreateFinancialInfoInDatabase()
     {
         var options = GetDbContextOptions();
 
-        var customers = GenerateCustomers(5, null, null);
+        var financialInfos = new Faker<FinancialInfo>()
+            .CustomInstantiator(f =>
+                new FinancialInfo(f.Finance.Account()))
+            .Generate(5);
 
         await using (var context = new AppDbContext(options))
         {
             TruncateTables(context);
 
-            await context.Customers.AddRangeAsync(customers);
-            await context.SaveChangesAsync(); // Save changes to the database
+            await context.FinancialInfo.AddRangeAsync(financialInfos);
+            await context.SaveChangesAsync();
 
-            var customerCount = await context.Customers.CountAsync(); // Count the number of customers
-            var accountsCount = await context.IndividualAccounts.CountAsync(); // Count the number of customers
+            var financialInfoCount = await context.FinancialInfo.CountAsync();
+            Assert.Equal(5, financialInfoCount);
+        }
+    }
+
+    [Fact]
+    public async Task AddFacility_ShouldCreateFacilityInDatabase()
+    {
+        var options = GetDbContextOptions();
+
+        var facilities = new Faker<Facility>()
+            .CustomInstantiator(f =>
+                new Facility(
+                    f.Address.City(),
+                    f.Company.CompanyName()
+                ))
+            .Generate(5);
+
+        await using (var context = new AppDbContext(options))
+        {
+            TruncateTables(context);
+
+            await context.Facilities.AddRangeAsync(facilities);
+            await context.SaveChangesAsync();
+
+            var facilityCount = await context.Facilities.CountAsync();
+            Assert.Equal(5, facilityCount);
+        }
+    }
+
+    [Fact]
+    public void AddCustomer_ShouldCreateCustomerInDatabase_No_Family()
+    {
+        var options = GetDbContextOptions();
+
+        var customers = GenerateCustomers(5, null, null);
+
+        using (var context = new AppDbContext(options))
+        {
+            TruncateTables(context);
+
+            context.Customers.AddRange(customers);
+            context.SaveChanges(); // Save changes to the database
+
+            var customerCount = context.Customers.Count(); // Count the number of customers
+            var accountsCount = context.Accounts.Count(); // Count the number of customers
 
             Assert.Equal(5, customerCount); // Ensure there are exactly 5 Customers
             Assert.Equal(5, accountsCount); // Ensure there are exactly 5 Customers
@@ -144,7 +205,11 @@ public class ModelTest()
         {
             TruncateTables(context);
 
-            await CreateFamilies(context, 5);
+            var families = GenerateFamilies(5);
+
+            context.Families.AddRange(families);
+
+            context.SaveChanges();
 
             var familiesCount = await context.Families.CountAsync(); // Count the number of families
 
@@ -161,15 +226,17 @@ public class ModelTest()
         {
             TruncateTables(context);
 
-            List<Family> families = await CreateFamilies(context, 5);
+            var families = GenerateFamilies(5);
+
+            context.Families.AddRange(families);
 
             List<Customer.RolesEnum> roles = [Customer.RolesEnum.Child, Customer.RolesEnum.Parent];
 
             var customers = GenerateCustomers(20, families, roles);
 
-            await context.Customers.AddRangeAsync(customers);
+            context.Customers.AddRange(customers);
 
-            await context.SaveChangesAsync();
+            context.SaveChanges();
 
             var accountsCount = await context.Customers.CountAsync(); // Count the number of customers
 
@@ -195,12 +262,117 @@ public class ModelTest()
             await context.SaveChangesAsync();
 
             var coachesCount = await context.Coaches.CountAsync(); // Count the number of coaches
-            var accountsCount = await context.IndividualAccounts.CountAsync(); // Count the number of coaches
+            var accountsCount = await context.Accounts.CountAsync(); // Count the number of coaches
 
             Assert.Equal(5, coachesCount); // Ensure there are exactly 5 coaches
             Assert.Equal(5, accountsCount); // Ensure there are exactly 5 accounts
         }
     }
 
+    [Fact]
+    public async Task AddBasicAthleteInfo_ShouldCreateBasicAthleteInfoInDatabase()
+    {
+        var options = GetDbContextOptions();
+
+        var customers = GenerateCustomers(5, null, null);
+        var basicAthleteInfos = customers.Select(c => new BasicAthleteInfo(c.Id) { Customer = c }).ToList();
+
+        await using (var context = new AppDbContext(options))
+        {
+            TruncateTables(context);
+
+            await context.Customers.AddRangeAsync(customers);
+            await context.BasicAthleteInfo.AddRangeAsync(basicAthleteInfos);
+            await context.SaveChangesAsync();
+
+            var basicAthleteInfoCount = await context.BasicAthleteInfo.CountAsync();
+            Assert.Equal(5, basicAthleteInfoCount);
+        }
+    }
+
+    [Fact]
+    public void AddAdvancedAthleteInfo_ShouldCreateAdvancedAthleteInfoInDatabase()
+    {
+        var options = GetDbContextOptions();
+
+        var customers = GenerateCustomers(5, null, null);
+
+        using (var context = new AppDbContext(options))
+        {
+            TruncateTables(context);
+
+            context.Customers.AddRange(customers);
+            context.SaveChanges();
+
+            var advancedAthleteInfos = customers.Select(c => new AdvancedAthleteInfo(c.Id)).ToList();
+
+            context.AdvancedAthleteInfo.AddRange(advancedAthleteInfos);
+            context.SaveChanges();
+
+            var advancedAthleteInfoCount = context.AdvancedAthleteInfo.Count();
+            Assert.Equal(5, advancedAthleteInfoCount);
+        }
+    }
+
+    [Fact]
+    public async Task AddCourse_ShouldCreateCourseInDatabase()
+    {
+        var options = GetDbContextOptions();
+
+        var courses = GenerateCourses(5);
+
+        await using (var context = new AppDbContext(options))
+        {
+            TruncateTables(context);
+
+            await context.Courses.AddRangeAsync(courses);
+            await context.SaveChangesAsync();
+
+            var courseCount = await context.Courses.CountAsync();
+            Assert.Equal(5, courseCount);
+        }
+    }
+
+    [Fact]
+    public void AddCourseSchedule_ShouldCreateCourseScheduleInDatabase()
+    {
+        var options = GetDbContextOptions();
+
+        var coaches = GenerateCoaches(5);
+        var courses = GenerateCourses(5);
+
+        using (var context = new AppDbContext(options))
+        {
+            TruncateTables(context);
+
+            context.Coaches.AddRange(coaches);
+            context.Courses.AddRange(courses);
+
+            context.SaveChanges();
+
+            var courseSchedules = new Faker<CourseSchedule>()
+                .CustomInstantiator(f =>
+                {
+                    var randomCoach = coaches[f.Random.Int(0, coaches.Count - 1)];
+                    var randomCourse = courses[f.Random.Int(0, courses.Count - 1)];
+
+                    return new CourseSchedule(
+                        randomCourse.Id,
+                        f.Commerce.ProductName(),
+                        DaysInWeekEnum.M,
+                        TimeOnly.FromDateTime(f.Date.Future()),
+                        TimeOnly.FromDateTime(f.Date.Past()),
+                        randomCoach.Id
+                    );
+                })
+                .Generate(5);
+
+            context.CourseSchedules.AddRange(courseSchedules);
+            context.SaveChanges();
+
+            var courseScheduleCount = context.CourseSchedules.Count();
+            Assert.Equal(5, courseScheduleCount);
+        }
+    }
 
 }

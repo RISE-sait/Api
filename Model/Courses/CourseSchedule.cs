@@ -1,17 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Api.Model.People;
+using Api.enums;
+using Api.Model.People.Employees;
 
 namespace Api.Model.Courses
 {
-    public class CourseSchedule(Guid courseId, string location, CourseSchedule.DaysInWeekEnum day, TimeOnly beginTime, TimeOnly endTime, Guid coachId)
+    public class CourseSchedule(Guid courseId, string location, DaysInWeekEnum day, TimeOnly beginTime, TimeOnly endTime, Guid coachId)
     {
         
         [ForeignKey("Course")]
         public Guid CourseId { get; set; } = courseId;
-        public required Course Course { get; set; }
+        public Course Course { get; set; } = null!;
 
-        public required Coach Coach {get; set; } 
+        public Coach Coach {get; set; } = null!;
         
         [ForeignKey("Coach")]
         public Guid CoachId { get; set; } = coachId;
@@ -22,16 +23,5 @@ namespace Api.Model.Courses
 
         public TimeOnly BeginTime { get; set; } = beginTime;
         public TimeOnly EndTime { get; set; } = endTime;
-
-        public enum DaysInWeekEnum
-        {
-            M,
-            Tues,
-            W,
-            Thurs,
-            F,
-            Sat,
-            Sun
-        }
     }
 }

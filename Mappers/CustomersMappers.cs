@@ -1,14 +1,21 @@
-using Riok.Mapperly.Abstractions;
 using Api.Model.People.Customers;
 using Api.Model.People.Customers.Dto;
-using Api.Model.People.Employees;
-using Api.Model.People.Employees.Dto;
 
 namespace Api.Mappers
 {
     // [Mapper]
+
+    /// <summary>
+    /// Provides extension methods for mapping between Customer and DTO objects.
+    /// </summary>
     public static class CustomerMapper
     {
+
+        /// <summary>
+        /// Maps a CreateCustomerDto object to a Customer object.
+        /// </summary>
+        /// <param name="createCustomerDto">The CreateCustomerDto object to map from.</param>
+        /// <returns>A Customer object mapped from the CreateCustomerDto object.</returns>
         public static Customer MapToCustomer(this CreateCustomerDto createCustomerDto)
         {
             var customer = new Customer(
@@ -33,6 +40,11 @@ namespace Api.Mappers
             return customer;
         }
 
+        /// <summary>
+        /// Maps a Customer object to a ReturnCustomerDto object.
+        /// </summary>
+        /// <param name="customer">The Customer object to map from.</param>
+        /// <returns>A ReturnCustomerDto object mapped from the Customer object.</returns>
         public static ReturnCustomerDto MapToReturnCustomerDto(this Customer customer)
         {
             return new ReturnCustomerDto

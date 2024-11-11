@@ -108,6 +108,17 @@ public class ModelTest()
             )).Generate(count);
     }
 
+    private static List<Facility> GenerateFacilities(int count)
+    {
+        return new Faker<Facility>()
+            .CustomInstantiator(f =>
+                new Facility(
+                    f.Address.City(),
+                    f.Company.CompanyName()
+                ))
+            .Generate(count);
+    }
+
     [Fact]
     public async Task AddAdmin_ShouldCreateAdminInDatabase()
     {
@@ -150,26 +161,20 @@ public class ModelTest()
     }
 
     [Fact]
-    public async Task AddFacility_ShouldCreateFacilityInDatabase()
+    public void AddFacility_ShouldCreateFacilityInDatabase()
     {
         var options = GetDbContextOptions();
 
-        var facilities = new Faker<Facility>()
-            .CustomInstantiator(f =>
-                new Facility(
-                    f.Address.City(),
-                    f.Company.CompanyName()
-                ))
-            .Generate(5);
+        var facilities = GenerateFacilities(5);
 
-        await using (var context = new AppDbContext(options))
+        using (var context = new AppDbContext(options))
         {
             TruncateTables(context);
 
-            await context.Facilities.AddRangeAsync(facilities);
-            await context.SaveChangesAsync();
+            context.Facilities.AddRange(facilities);
+            context.SaveChanges();
 
-            var facilityCount = await context.Facilities.CountAsync();
+            var facilityCount = context.Facilities.Count();
             Assert.Equal(5, facilityCount);
         }
     }
@@ -340,6 +345,7 @@ public class ModelTest()
 
         var coaches = GenerateCoaches(5);
         var courses = GenerateCourses(5);
+        var facilities = GenerateFacilities(5);
 
         using (var context = new AppDbContext(options))
         {
@@ -347,6 +353,7 @@ public class ModelTest()
 
             context.Coaches.AddRange(coaches);
             context.Courses.AddRange(courses);
+            context.Facilities.AddRange(facilities);
 
             context.SaveChanges();
 
@@ -355,10 +362,11 @@ public class ModelTest()
                 {
                     var randomCoach = coaches[f.Random.Int(0, coaches.Count - 1)];
                     var randomCourse = courses[f.Random.Int(0, courses.Count - 1)];
+                    var randomFacility = facilities[f.Random.Int(0, facilities.Count - 1)];
 
                     return new CourseSchedule(
                         randomCourse.Id,
-                        f.Commerce.ProductName(),
+                        randomFacility.Id,
                         DaysInWeekEnum.M,
                         TimeOnly.FromDateTime(f.Date.Future()),
                         TimeOnly.FromDateTime(f.Date.Past()),

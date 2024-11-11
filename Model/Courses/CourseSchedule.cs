@@ -5,7 +5,7 @@ using Api.Model.People.Employees;
 
 namespace Api.Model.Courses
 {
-    public class CourseSchedule(Guid courseId, string location, DaysInWeekEnum day, TimeOnly beginTime, TimeOnly endTime, Guid coachId)
+    public class CourseSchedule(Guid courseId, Guid facilityId, DaysInWeekEnum day, TimeOnly beginTime, TimeOnly endTime, Guid coachId)
     {
         
         [ForeignKey("Course")]
@@ -17,8 +17,9 @@ namespace Api.Model.Courses
         [ForeignKey("Coach")]
         public Guid CoachId { get; set; } = coachId;
 
-        [Length(1, 50)]
-        public string Location { get; set; } = location;
+        [ForeignKey("Facility")]
+        public Guid FacilityId { get; set; } = facilityId;
+        public Facility Facility {get; set; } = null!;
         public DaysInWeekEnum Day { get; set; } = day;
 
         public TimeOnly BeginTime { get; set; } = beginTime;

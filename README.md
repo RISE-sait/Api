@@ -8,6 +8,8 @@ Run 'docker compose up --watch'.
 
 Done.
 
+Now whenever you make changes to the code, and save, the server will automatically rebuild and update.
+
 # How to contribute
 
 Find issues by checking the Issues tab, or discover issues by yourself.

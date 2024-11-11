@@ -1,4 +1,5 @@
-using Api.enums;
+using Api.Database;
+using Api.helpers;
 
 namespace Api.Interfaces
 {
@@ -9,22 +10,24 @@ namespace Api.Interfaces
             throw new NotImplementedException();
         }
 
-        void RemoveCustomerFromTeam(Guid customerId, Guid teamId) {
-            throw new NotImplementedException();
-        }
-        void AmendCourseSchedule(Guid courseId, ScheduleDayTime[] newSchedule) {
+        void RemoveCustomerFromTeam(Guid customerId, Guid teamId)
+        {
             throw new NotImplementedException();
         }
 
-        void ManageBooking(Guid facilityId, DateTime startDateTime, DateTime endDateTime) {
-
+        async Task ManageBooking(AppDbContext context, BookingInfo bookingInfo)
+        {
+            if (await ScheduleHelper.IsBookingOverlapping(context, bookingInfo))
+            {
+                throw new InvalidOperationException("The course schedule overlaps with an existing schedule.");
+            }
         }
     }
 
-    public struct ScheduleDayTime
+    public struct BookingInfo
     {
-        public DaysInWeekEnum Day;
-        public TimeOnly StartTime;
-        public TimeOnly EndTime;
+        public Guid FacilityId;
+        public DateTime StartDateTime;
+        public DateTime EndDateTime;
     }
 }

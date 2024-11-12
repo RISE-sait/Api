@@ -74,5 +74,13 @@ namespace Api.Database
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
         }
+
+
+        public static DbContextOptions<AppDbContext> GetLocalDbContextOptions()
+        {
+            return new DbContextOptionsBuilder<AppDbContext>()
+                .UseNpgsql("Host=localhost;Port=5432;Username=postgres;Password=root;Database=mydatabase")
+                .Options;
+        }
     }
 }

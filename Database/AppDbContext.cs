@@ -57,6 +57,7 @@ namespace Api.Database
                new
                {
                    cs.CourseId,
+                   cs.StartDate,
                    cs.FacilityId,
                    cs.BeginTime,
                });

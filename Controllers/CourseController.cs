@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Interfaces;
+using Api.Model.Courses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -12,7 +13,7 @@ namespace Api.Controllers
     public class CourseController : ControllerBase
     {
         [HttpPatch("{courseId}/schedule")]
-        public ActionResult AmendCourseSchedule(Guid courseId, [FromBody] ScheduleDayTime[] newSchedule)
+        public ActionResult AmendCourseSchedule(Guid courseId, [FromBody] ScheduleInfo[] newSchedule)
         {
             try
             {

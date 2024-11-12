@@ -8,22 +8,25 @@ namespace Api.helpers
 {
     public static class ScheduleHelper
     {
-        public static async Task<bool> IsScheduleOverlapping(AppDbContext context, CourseSchedule courseSchedule)
+        public static Task<bool> IsFacilityScheduleOverlapping(AppDbContext context, CourseSchedule courseSchedule)
         {
-            return await context.CourseSchedules
-                .AnyAsync(cs => cs.FacilityId == courseSchedule.FacilityId && cs.Day == courseSchedule.Day &&
-                                cs.BeginTime < courseSchedule.EndTime && cs.EndTime > courseSchedule.BeginTime);
+            return IsOverlapping(context, courseSchedule.FacilityId, courseSchedule.Day, courseSchedule.StartDate, courseSchedule.EndDate, courseSchedule.BeginTime, courseSchedule.EndTime);
         }
 
-        public static async Task<bool> IsBookingOverlapping(AppDbContext context, BookingInfo bookingInfo)
+        public static Task<bool> IsFacilityScheduleOverlapping(AppDbContext context, ScheduleInfo scheduleInfo)
         {
-            var day = (DaysInWeekEnum)bookingInfo.StartDateTime.DayOfWeek;
-            var beginTime = TimeOnly.FromDateTime(bookingInfo.StartDateTime);
-            var endTime = TimeOnly.FromDateTime(bookingInfo.EndDateTime);
+            return IsOverlapping(context, scheduleInfo.FacilityId, scheduleInfo.Day, scheduleInfo.StartDate, scheduleInfo.EndDate, scheduleInfo.BeginTime, scheduleInfo.EndTime);
+        }
 
+        private static async Task<bool> IsOverlapping(AppDbContext context, Guid facilityId, DaysInWeekEnum day, DateOnly startDate, DateOnly endDate, TimeOnly beginTime, TimeOnly endTime)
+        {
             return await context.CourseSchedules
-                .AnyAsync(cs => cs.FacilityId == bookingInfo.FacilityId && cs.Day == day &&
-                                cs.BeginTime < endTime && cs.EndTime > beginTime);
+                .AnyAsync(cs => cs.FacilityId == facilityId &&
+                                cs.Day == day &&
+                                cs.StartDate <= endDate &&
+                                cs.EndDate >= startDate &&
+                                cs.BeginTime < endTime &&
+                                cs.EndTime > beginTime);
         }
     }
 }

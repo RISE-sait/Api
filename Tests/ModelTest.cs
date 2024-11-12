@@ -1,5 +1,6 @@
 using Api.Database;
 using Api.enums;
+using Api.Interfaces;
 using Api.Model;
 using Api.Model.Courses;
 using Api.Model.People.Customers;
@@ -339,7 +340,7 @@ public class ModelTest()
     }
 
     [Fact]
-    public void AddCourseSchedule_ShouldCreateCourseScheduleInDatabase()
+    public async Task AddCourseSchedule_ShouldWorkCorrectly()
     {
         var options = GetDbContextOptions();
 
@@ -347,7 +348,7 @@ public class ModelTest()
         var courses = GenerateCourses(5);
         var facilities = GenerateFacilities(5);
 
-        using (var context = new AppDbContext(options))
+        await using (var context = new AppDbContext(options))
         {
             TruncateTables(context);
 
@@ -355,32 +356,50 @@ public class ModelTest()
             context.Courses.AddRange(courses);
             context.Facilities.AddRange(facilities);
 
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
-            var courseSchedules = new Faker<CourseSchedule>()
-                .CustomInstantiator(f =>
-                {
-                    var randomCoach = coaches[f.Random.Int(0, coaches.Count - 1)];
-                    var randomCourse = courses[f.Random.Int(0, courses.Count - 1)];
-                    var randomFacility = facilities[f.Random.Int(0, facilities.Count - 1)];
+            ICoach coach = coaches[0];
 
-                    return new CourseSchedule(
-                        randomCourse.Id,
-                        randomFacility.Id,
-                        DaysInWeekEnum.M,
-                        TimeOnly.FromDateTime(f.Date.Future()),
-                        TimeOnly.FromDateTime(f.Date.Past()),
-                        randomCoach.Id
-                    );
-                })
-                .Generate(5);
+            // Add non-overlapping course schedules
+            var courseSchedule1 = new CourseSchedule(
+                courses[0].Id,
+                facilities[0].Id,
+                DaysInWeekEnum.M,
+                DateOnly.FromDateTime(DateTime.Now),
+                DateOnly.FromDateTime(DateTime.Now.AddMonths(1)),
+                new TimeOnly(9, 0),
+                new TimeOnly(9, 59),
+                coaches[0].Id
+            );
 
-            context.CourseSchedules.AddRange(courseSchedules);
-            context.SaveChanges();
+            var courseSchedule2 = new CourseSchedule(
+                courses[1].Id,
+                facilities[0].Id,
+                DaysInWeekEnum.M,
+                DateOnly.FromDateTime(DateTime.Now),
+                DateOnly.FromDateTime(DateTime.Now.AddMonths(1)),
+                new TimeOnly(10, 0),
+                new TimeOnly(10, 59),
+                coaches[1].Id
+            );
 
-            var courseScheduleCount = context.CourseSchedules.Count();
-            Assert.Equal(5, courseScheduleCount);
+            await coach.AddCourseSchedule(context, courseSchedule1);
+            await coach.AddCourseSchedule(context, courseSchedule2);
+
+            // Attempt to add an overlapping course schedule
+            var overlappingCourseSchedule = new CourseSchedule(
+                courses[2].Id,
+                facilities[0].Id,
+                DaysInWeekEnum.M,
+                DateOnly.FromDateTime(DateTime.Now),
+                DateOnly.FromDateTime(DateTime.Now.AddMonths(1)),
+                new TimeOnly(10, 40),
+                new TimeOnly(12, 30),
+                coaches[2].Id
+            );
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => coach.AddCourseSchedule(context, overlappingCourseSchedule));
+
         }
     }
-
 }

@@ -1,29 +1,55 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Api.Interfaces;
+using Api.Database;
+using Api.Mappers;
 using Api.Model.Courses;
+using Api.Model.Courses.Dto;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CourseController : ControllerBase
+    public class CourseController(AppDbContext context) : ControllerBase
     {
-        [HttpPatch("{courseId}/schedule")]
-        public ActionResult AmendCourseSchedule(Guid courseId, [FromBody] ScheduleInfo[] newSchedule)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCourseById(Guid id)
         {
-            try
+            var course = await context.Courses.SingleAsync(c => c.Id == id);
+            if (course == null)
             {
-                AmendCourseSchedule(courseId, newSchedule);
-                return Ok();
+                return NotFound();
             }
-            catch (Exception ex)
+
+            return Ok(course);
+        }
+
+       [HttpPost]
+        public async Task<IActionResult> CreateCourse([FromBody] CreateCourseDto createCourseDto)
+        {
+            if (!ModelState.IsValid)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(ModelState);
             }
+
+            Course course = createCourseDto.MapToCourse();
+            await context.Courses.AddAsync(course);
+            await context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(CreateCourse), new { id = course.Id }, course);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCourse(Guid id)
+        {
+            var course = await context.Courses.SingleAsync(c => c.Id == id);
+            if (course == null)
+            {
+                return NotFound();
+            }
+
+            context.Courses.Remove(course);
+            await context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

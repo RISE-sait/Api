@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Api.Model;
 using Api.Model.Courses;
+using Api.Model.Facilities;
 using Api.Model.People.Customers;
 using Api.Model.People.Employees;
 using Bogus;

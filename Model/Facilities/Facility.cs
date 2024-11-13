@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Api.Model
+namespace Api.Model.Facilities
 {
-    public class Facility(string location, string name)
+    public class Facility(string name, string location)
     {
 
         [Key]

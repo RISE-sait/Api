@@ -30,7 +30,6 @@ namespace Api.Model.People.Customers
         public bool HasConsentMarketingEmails { get; set; }
         public bool HasConsentMarketingSms { get; set; }
         public bool ShouldReceiveReceiptsForAllPayments { get; set; }
-        public ICollection<FinancialInfo> FinancialInfos { get; set; } = [];
         public int Credit { get; set; }
         public int Balance { get; set; }
         public BasicAthleteInfo? BasicAthleteInfo { get; set; }

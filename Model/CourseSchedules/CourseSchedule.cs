@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Api.enums;
+using Api.Model.Facilities;
 using Api.Model.People.Employees;
 
 namespace Api.Model.Courses
@@ -25,5 +26,15 @@ namespace Api.Model.Courses
         public DateOnly EndDate { get; set; } = endDate;
         public TimeOnly BeginTime { get; set; } = beginTime;
         public TimeOnly EndTime { get; set; } = endTime;
+    }
+    
+    public struct ScheduleInfo
+    {
+        public Guid FacilityId;
+        public DaysInWeekEnum Day;
+        public DateOnly StartDate;
+        public DateOnly EndDate;
+        public TimeOnly BeginTime;
+        public TimeOnly EndTime;
     }
 }

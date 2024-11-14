@@ -1,6 +1,5 @@
 using Api.Database;
 using Api.enums;
-using Api.Interfaces;
 using Api.Model.Courses;
 using Microsoft.EntityFrameworkCore;
 

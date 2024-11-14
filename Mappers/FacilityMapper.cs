@@ -17,7 +17,8 @@ namespace Api.Mappers
         {
             return new Facility(
                 createFacilityDto.Name,
-                createFacilityDto.Location
+                createFacilityDto.Location,
+                createFacilityDto.FacilityTypeId
             );
         }
     }

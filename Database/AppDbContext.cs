@@ -24,8 +24,7 @@ namespace Api.Database
         public DbSet<AdvancedAthleteInfo> AdvancedAthleteInfo { get; init; }
 
         public DbSet<Facility> Facilities { get; init; }
-        public DbSet<FinancialInfo> FinancialInfo { get; init; }
-
+        public DbSet<FacilityType> FacilityTypes { get; init; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
@@ -44,10 +43,6 @@ namespace Api.Database
             modelBuilder.Entity<Admin>().ToTable("Admins");
 
             modelBuilder.Entity<Coach>().ToTable("Coaches");
-
-            modelBuilder.Entity<Customer>().HasMany(c => c.FinancialInfos)
-                .WithMany(fi => fi.Customers)
-                .UsingEntity(j => j.ToTable("CustomerFinancialInfo"));
 
             modelBuilder.Entity<Family>().HasMany(f => f.Members)
                     .WithOne(m => m.Family)

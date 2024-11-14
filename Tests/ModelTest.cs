@@ -29,28 +29,6 @@ public class ModelTest()
     }
 
     [Fact]
-    public async Task AddFinancialInfo_ShouldCreateFinancialInfoInDatabase()
-    {
-        var options = AppDbContext.GetLocalDbContextOptions();
-
-        var financialInfos = new Faker<FinancialInfo>()
-            .CustomInstantiator(f =>
-                new FinancialInfo(f.Finance.Account()))
-            .Generate(5);
-
-        await using (var context = new AppDbContext(options))
-        {
-            Helper.TruncateTables(context);
-
-            await context.FinancialInfo.AddRangeAsync(financialInfos);
-            await context.SaveChangesAsync();
-
-            var financialInfoCount = await context.FinancialInfo.CountAsync();
-            Assert.Equal(5, financialInfoCount);
-        }
-    }
-
-    [Fact]
     public void AddFacility_ShouldCreateFacilityInDatabase()
     {
         var options = AppDbContext.GetLocalDbContextOptions();

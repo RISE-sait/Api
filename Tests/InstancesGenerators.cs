@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Api.Model;
 using Api.Model.Courses;
 using Api.Model.Facilities;
 using Api.Model.People.Customers;
@@ -85,13 +80,24 @@ namespace Api.Tests
                 )).Generate(count);
         }
 
+        public static List<FacilityType> GenerateFacilityTypes(int count)
+        {
+            return new Faker<FacilityType>().CustomInstantiator(f =>
+                new FacilityType(
+                    f.Address.City()
+                )).Generate(count);
+        }
+
         public static List<Facility> GenerateFacilities(int count)
         {
+            var facilitiesTypes = GenerateFacilityTypes(count);
+
             return new Faker<Facility>()
                 .CustomInstantiator(f =>
                     new Facility(
                         f.Address.City(),
-                        f.Company.CompanyName()
+                        f.Company.CompanyName(),
+                        facilitiesTypes[new Random().Next(facilitiesTypes.Count)].Id
                     ))
                 .Generate(count);
         }

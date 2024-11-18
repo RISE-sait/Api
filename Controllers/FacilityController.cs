@@ -2,7 +2,9 @@ using Api.Database;
 using Api.Mappers;
 using Api.Model.Facilities;
 using Api.Model.Facilities.Dto;
+using LanguageExt;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers
 {
@@ -18,10 +20,13 @@ namespace Api.Controllers
         /// <response code="200">Returns a list of all facilities.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<Facility>), StatusCodes.Status200OK)]
-        public IActionResult GetAllFacilities(int limit = 5)
+        public async Task<IActionResult> GetAllFacilitiesAsync(int limit = 5)
         {
-            var facilities = context.Facilities.Take(limit).ToList();
-            return Ok(facilities);
+            var facilities = await context.Facilities.Include(f => f.FacilityType).Take(limit).ToListAsync();
+
+            var facilityResponses = facilities.Select(f => f.MapToFacilityResponseDto()).ToList();
+
+            return Ok(facilityResponses);
         }
 
         /// <summary>
@@ -32,17 +37,17 @@ namespace Api.Controllers
         /// <response code="200">Returns the facility with the specified ID.</response>
         /// <response code="404">If the facility is not found.</response>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(Facility), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FacilityResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetFacilityById(Guid id)
         {
-            var facility = await context.Facilities.FindAsync(id);
+            var facility = await context.Facilities.Where(f => f.Id == id).Include(f => f.FacilityType).FirstOrDefaultAsync();
             if (facility == null)
             {
                 return NotFound();
             }
 
-            return Ok(facility);
+            return Ok(facility.MapToFacilityResponseDto());
         }
 
         /// <summary>
@@ -53,7 +58,7 @@ namespace Api.Controllers
         /// <response code="201">Returns the newly created facility.</response>
         /// <response code="400">If the model state is invalid.</response>
         [HttpPost]
-        [ProducesResponseType(typeof(Facility), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(FacilityResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateFacility([FromBody] CreateFacilityDto createFacilityDto)
         {
@@ -67,7 +72,9 @@ namespace Api.Controllers
             await context.Facilities.AddAsync(facility);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(CreateFacility), new { id = facility.Id }, facility);
+            await context.Entry(facility).Reference(f => f.FacilityType).LoadAsync();
+
+            return CreatedAtAction(nameof(GetFacilityById), new { id = facility.Id }, facility.MapToFacilityResponseDto());
         }
 
         /// <summary>
@@ -79,25 +86,28 @@ namespace Api.Controllers
         /// <response code="204">If the update is successful.</response>
         /// <response code="400">If the model state is invalid.</response>
         /// <response code="404">If the facility is not found.</response>
-        [HttpPut("{id}")]
+        [HttpPut]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateFacility(Guid id, [FromBody] CreateFacilityDto updateFacilityDto)
+        public async Task<IActionResult> UpdateFacility([FromBody] PutFacilityDto putFacilityDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var existingFacility = await context.Facilities.FindAsync(id);
-            if (existingFacility == null)
+            var existingFacility = await context.Facilities.Where(f => f.Id == putFacilityDto.FacilityId).FirstOrDefaultAsync();
+            var facilityType = await context.FacilityTypes.Where(ft => ft.Id == putFacilityDto.FacilityTypeId).FirstOrDefaultAsync();
+
+            if (existingFacility == null || facilityType == null)
             {
                 return NotFound();
             }
 
-            existingFacility.Name = updateFacilityDto.Name;
-            existingFacility.Location = updateFacilityDto.Location;
+            existingFacility.Name = putFacilityDto.Name;
+            existingFacility.Location = putFacilityDto.Location;
+            existingFacility.FacilityTypeId = putFacilityDto.FacilityTypeId;
 
             context.Facilities.Update(existingFacility);
             await context.SaveChangesAsync();

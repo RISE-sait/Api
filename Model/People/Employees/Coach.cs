@@ -1,8 +1,8 @@
-﻿using Api.Model.Courses;
+﻿using Api.Model.CourseSchedules;
 
 namespace Api.Model.People.Employees
 {
-    public class Coach(string name, string email, string phoneNumber, string bankAccountNumber) : Employee(name, email, phoneNumber, bankAccountNumber)
+    public class Coach(string name, string email, string phoneNumber) : Employee(name, email, phoneNumber)
     {
         public ICollection<CourseSchedule> CourseSchedules { get; set; } = [];
     }

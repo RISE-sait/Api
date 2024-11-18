@@ -1,23 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Bogus" Version="35.6.1"/>
     <PackageReference Include="LanguageExt.Core" Version="4.4.9"/>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0-rc.2.24474.1"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8"/>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0-rc.2"/>
     <PackageReference Include="dotenv.net" Version="3.2.1"/>
     <PackageReference Include="xunit" Version="2.9.2"/>
     <PackageReference Include="xunit.runner.visualstudio" Version="3.0.0-pre.42"/>
     <PackageReference Include="Riok.Mapperly" Version="4.1.1-next.0"/>
+    <PackageReference Include="Scalar.AspNetCore" Version="1.2.39"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0-rc.2.24474.1"/>
   </ItemGroup>
 </Project>

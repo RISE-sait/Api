@@ -1,6 +1,6 @@
 using Api.Database;
 using Api.enums;
-using Api.Model.Courses;
+using Api.Model.CourseSchedules;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 

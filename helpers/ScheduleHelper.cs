@@ -1,17 +1,12 @@
 using Api.Database;
 using Api.enums;
-using Api.Model.Courses;
+using Api.Model.CourseSchedules;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.helpers
 {
     public static class ScheduleHelper
     {
-        public static Task<bool> IsFacilityScheduleOverlapping(AppDbContext context, CourseSchedule courseSchedule)
-        {
-            return IsOverlapping(context, courseSchedule.FacilityId, courseSchedule.Day, courseSchedule.StartDate, courseSchedule.EndDate, courseSchedule.BeginTime, courseSchedule.EndTime);
-        }
-
         public static Task<bool> IsFacilityScheduleOverlapping(AppDbContext context, ScheduleInfo scheduleInfo)
         {
             return IsOverlapping(context, scheduleInfo.FacilityId, scheduleInfo.Day, scheduleInfo.StartDate, scheduleInfo.EndDate, scheduleInfo.BeginTime, scheduleInfo.EndTime);

@@ -1,10 +1,10 @@
 using Api.Model;
 using Api.Model.Courses;
+using Api.Model.CourseSchedules;
 using Api.Model.Facilities;
 using Api.Model.People;
 using Api.Model.People.Customers;
 using Api.Model.People.Employees;
-using dotenv.net;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Database
@@ -27,14 +27,9 @@ namespace Api.Database
         public DbSet<FacilityType> FacilityTypes { get; init; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONN_STRING");
 
-            var shouldUseLocal = true;
-
-            // var dbConnectionString = Environment.GetEnvironmentVariable($"DB_URL_FOR_SERVER_ON_{(shouldUseLocal ? "LOCAL" : "DOCKER")}_NETWORK");
-
-            // Console.WriteLine(dbConnectionString);
-
-            optionsBuilder.UseNpgsql($"Host={(shouldUseLocal ? "localhost" : "api_db")};Port=5432;Username=postgres;Password=root;Database=mydatabase");
+            optionsBuilder.UseNpgsql(dbConnectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -69,8 +64,13 @@ namespace Api.Database
                 .HasForeignKey<AdvancedAthleteInfo>(ai => ai.CustomerId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
-        }
 
+            modelBuilder.Entity<FacilityType>(entity =>
+       {
+           entity.HasKey(ft => ft.Id);
+           entity.HasIndex(ft => ft.Name).IsUnique();
+       });
+        }
 
         public static DbContextOptions<AppDbContext> GetLocalDbContextOptions()
         {

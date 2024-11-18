@@ -13,5 +13,16 @@ namespace Api.Mappers
                 createCourseDto.EndDateTime
             );
         }
+
+         public static CourseResponseDto MapToCourseResponse (this Course course)
+        {
+            return new CourseResponseDto(
+                course.Id,
+                course.Name,
+                course.Description,
+                course.StartDateTime,
+                course.EndDateTime
+            );
+        }
     }
 }

@@ -21,5 +21,15 @@ namespace Api.Mappers
                 createFacilityDto.FacilityTypeId
             );
         }
+        
+        public static FacilityResponseDto MapToFacilityResponseDto(this Facility facility)
+        {
+            return new FacilityResponseDto(
+                facility.Id,
+                facility.Name,
+                facility.Location,
+                facility.FacilityType.Name
+            );
+        }
     }
 }

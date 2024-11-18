@@ -52,8 +52,7 @@ namespace Api.Tests
                     new Coach(
                         f.Person.FullName,
                         f.Internet.Email(),
-                        f.Phone.PhoneNumber("##########"),
-                        f.Finance.Account()
+                        f.Phone.PhoneNumber("##########")
                     )).Generate(amt);
         }
 
@@ -75,8 +74,7 @@ namespace Api.Tests
                 new Admin(
                     f.Person.FullName,
                     f.Internet.Email(),
-                    f.Phone.PhoneNumber("##########"),
-                        f.Finance.Account()
+                    f.Phone.PhoneNumber("##########")
                 )).Generate(count);
         }
 

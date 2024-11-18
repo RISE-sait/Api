@@ -1,4 +1,3 @@
-using Riok.Mapperly.Abstractions;
 using Api.Model.People.Employees;
 using Api.Model.People.Employees.Dto;
 namespace Api.Mappers
@@ -10,8 +9,7 @@ namespace Api.Mappers
             return new Coach(
                 name: createCoachDto.Name,
                 email: createCoachDto.Email,
-                phoneNumber: createCoachDto.PhoneNumber,
-                bankAccountNumber: createCoachDto.BankAccountNumber
+                phoneNumber: createCoachDto.PhoneNumber
             );
         }
     }

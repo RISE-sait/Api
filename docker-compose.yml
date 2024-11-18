@@ -18,23 +18,3 @@ services:
       PGADMIN_DEFAULT_EMAIL: 'admin@admin.com'
       PGADMIN_DEFAULT_PASSWORD: 'admin'
     
-  server:
-    container_name: '${COMPOSE_PROJECT_NAME}_server'
-
-    build:
-      context: .
-    ports:
-      - '5073:8080'
-    depends_on:
-      - db
-    develop:
-      watch:
-        - action: rebuild
-          path: ./
-          target: ./
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - DB_URL_FOR_SERVER_ON_DOCKER_NETWORK=${DB_URL_FOR_SERVER_ON_DOCKER_NETWORK}
-      - DB_URL_FOR_SERVER_ON_LOCAL_NETWORK=${DB_URL_FOR_SERVER_ON_LOCAL_NETWORK}
-    env_file:
-      - .env

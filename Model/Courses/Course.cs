@@ -13,7 +13,7 @@ namespace Api.Model.Courses
         
         [Length(1, 50)]
         public string Name {get; set; } = name;
-        public string Description {get; set; } = string.Empty;
+        public string? Description {get; set; }
         public DateOnly StartDateTime {get; set; } = startDateTime;
         public DateOnly EndDateTime {get; set; } = endDateTime;
         

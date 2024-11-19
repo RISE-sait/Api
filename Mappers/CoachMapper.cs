@@ -9,7 +9,18 @@ namespace Api.Mappers
             return new Coach(
                 name: createCoachDto.Name,
                 email: createCoachDto.Email,
-                phoneNumber: createCoachDto.PhoneNumber
+                phoneNumber: createCoachDto.PhoneNumber,
+                createCoachDto.BankAccountNumber
+            );
+        }
+
+         public static CoachResponseDto MapToCoachResponse(this Coach coach)
+        {
+            return new CoachResponseDto(
+                coach.Id,
+                coach.Name,
+                coach.Email,
+                coach.PhoneNumber!
             );
         }
     }

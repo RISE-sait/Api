@@ -2,7 +2,7 @@
 
 namespace Api.Model.People.Employees
 {
-    public class Coach(string name, string email, string phoneNumber) : Employee(name, email, phoneNumber)
+    public class Coach(string name, string email, string phoneNumber, string bankAccountNumber) : Employee(name, email, phoneNumber, bankAccountNumber)
     {
         public ICollection<CourseSchedule> CourseSchedules { get; set; } = [];
     }

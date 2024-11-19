@@ -1,8 +1,6 @@
 using Api.Database;
 using Api.Mappers;
 using Api.Model.Courses;
-using Api.Model.Courses.Dto;
-using LanguageExt.Pretty;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +14,23 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     public class CourseController(AppDbContext context) : ControllerBase
     {
+
+        /// <summary>
+        /// Retrieves courses.
+        /// </summary>
+        /// <returns>The courses </returns>
+        /// <response code="200">Returns the courses.</response>
+        /// <response code="404">If the course is not found.</response>
+
+        [HttpGet]
+        [ProducesResponseType(typeof(CourseResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetCourses()
+        {
+            var courses = await context.Courses.Select(c => c.MapToCourseResponse()).ToListAsync();
+
+            return Ok(courses);
+        }
 
         /// <summary>
         /// Retrieves a course by its ID.
@@ -97,10 +112,9 @@ namespace Api.Controllers
             }
 
             existingCourse.Name = updateCourseDto.Name;
-            // existingCourse.StartDateTime = updateCourseDto.StartDateTime;
-            // existingCourse.EndDateTime = updateCourseDto.EndDateTime;
-
-            // if (!string.IsNullOrEmpty(updateCourseDto.Description)) existingCourse.Description = updateCourseDto.Description;
+            existingCourse.StartDateTime = updateCourseDto.StartDateTime;
+            existingCourse.EndDateTime = updateCourseDto.EndDateTime;
+            existingCourse.Description = updateCourseDto.Description;
 
             context.Courses.Update(existingCourse);
             await context.SaveChangesAsync();

@@ -2,7 +2,6 @@ using Api.Database;
 using Api.helpers;
 using Api.Mappers;
 using Api.Model.CourseSchedules;
-using Api.Model.CourseSchedules.Dto;
 using LanguageExt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +19,7 @@ namespace Api.Controllers
         /// <param name="createCourseScheduleDto">The DTO containing the details of the course schedule to create.</param>
         /// <returns>An IActionResult indicating the result of the operation.</returns>
         [HttpPost()]
-        public async Task<IActionResult> CreateCourseSchedule([FromBody] CreateCourseScheduleDto createCourseScheduleDto)
+        public async Task<ActionResult<CourseScheduleResponseDto>> CreateCourseSchedule([FromBody] CreateCourseScheduleDto createCourseScheduleDto)
         {
             if (!ModelState.IsValid)
             {
@@ -29,7 +28,7 @@ namespace Api.Controllers
 
             var courseSchedule = createCourseScheduleDto.MapToCourseSchedule();
 
-            if (await ScheduleHelper.IsFacilityScheduleOverlapping(context, courseSchedule.MapToScheduleInfo()))
+            if (await ScheduleHelper.IsFacilityScheduleOverlapping(context, courseSchedule.MapToCourseScheduleDateTimes()))
             {
                 return Conflict(new { Message = "The course schedule overlaps with an existing schedule." });
             }
@@ -47,9 +46,9 @@ namespace Api.Controllers
         /// <param name="startDate">The start date of the course schedule.</param>
         /// <param name="facilityId">The ID of the facility.</param>
         /// <param name="beginTime">The begin time of the course schedule.</param>
-        /// <returns>An IActionResult containing the course schedule if found, otherwise a 404 Not Found response.</returns>
+        /// <returns>A course schedule if found, otherwise a 404 Not Found response.</returns>
         [HttpGet()]
-        [ProducesResponseType(typeof(CourseSchedule), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CourseScheduleResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCourseScheduleById(Guid courseId, DateOnly startDate, Guid facilityId, TimeOnly beginTime)
         {
@@ -92,7 +91,7 @@ namespace Api.Controllers
                 return NotFound();
             }
 
-            var updatedScheduleInfo = updateCourseScheduleDto.MapToCourseSchedule().MapToScheduleInfo();
+            var updatedScheduleInfo = updateCourseScheduleDto.MapToCourseSchedule().MapToCourseScheduleDateTimes();
 
             if (await ScheduleHelper.IsFacilityScheduleOverlapping(context, updatedScheduleInfo))
             {

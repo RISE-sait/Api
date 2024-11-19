@@ -2,26 +2,33 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Api.Model.People.Customers.Dto
 {
-    public record CreateCustomerDto: IValidatableObject
+    public sealed record CreateCustomerDto(
+        string Name,
+        string Email,
+        string PhoneNumber,
+        bool HasConsentMarketingEmails,
+        bool HasConsentMarketingSms,
+        bool ShouldReceiveReceiptsForAllPayments,
+        int Credit,
+        int Balance,
+        Guid? FamilyId = null,
+        Customer.RolesEnum? Role = null): IValidatableObject
     {
-        [Required]
         [MinLength(1)]
-        public required string Name { get; set; }
+    public string Name { get; set; } = Name;
 
-        [Required]
-        [EmailAddress]
-        public required string Email { get; set; }
+    [EmailAddress]
+    public string Email { get; set; } = Email;
 
-        [Required]
-        [Phone]
-        public required string PhoneNumber { get; set; }
-        public bool HasConsentMarketingEmails { get; set; }
-        public bool HasConsentMarketingSms { get; set; }
-        public bool ShouldReceiveReceiptsForAllPayments { get; set; }
-        public int Credit { get; set; }
-        public int Balance { get; set; }
-        public Guid? FamilyId { get; set; }
-        public Customer.RolesEnum? Role { get; set; }
+    [Phone]
+    public string PhoneNumber { get; set; } = PhoneNumber;
+    public bool HasConsentMarketingEmails { get; set; } = HasConsentMarketingEmails;
+    public bool HasConsentMarketingSms { get; set; } = HasConsentMarketingSms;
+    public bool ShouldReceiveReceiptsForAllPayments { get; set; } = ShouldReceiveReceiptsForAllPayments;
+    public int Credit { get; set; } = Credit;
+    public int Balance { get; set; } = Balance;
+    public Guid? FamilyId { get; set; } = FamilyId;
+    public Customer.RolesEnum? Role { get; set; } = Role;
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

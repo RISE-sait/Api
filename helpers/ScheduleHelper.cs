@@ -7,9 +7,10 @@ namespace Api.helpers
 {
     public static class ScheduleHelper
     {
-        public static Task<bool> IsFacilityScheduleOverlapping(AppDbContext context, ScheduleInfo scheduleInfo)
+        public static Task<bool> IsFacilityScheduleOverlapping(AppDbContext context, ScheduleDateTimes scheduleDateTimes)
         {
-            return IsOverlapping(context, scheduleInfo.FacilityId, scheduleInfo.Day, scheduleInfo.StartDate, scheduleInfo.EndDate, scheduleInfo.BeginTime, scheduleInfo.EndTime);
+            return IsOverlapping(context, scheduleDateTimes.FacilityId, scheduleDateTimes.Day, scheduleDateTimes.StartDate, 
+            scheduleDateTimes.EndDate, scheduleDateTimes.BeginTime, scheduleDateTimes.EndTime);
         }
 
         private static async Task<bool> IsOverlapping(AppDbContext context, Guid facilityId, DaysInWeekEnum day, DateOnly startDate, DateOnly endDate, TimeOnly beginTime, TimeOnly endTime)

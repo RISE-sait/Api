@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Api.Attributes;
 
-namespace Api.Model.Courses.Dto
+namespace Api.Model.Courses
 {
     public sealed record CreateCourseDto(
         [StringLength(50, MinimumLength = 1)] string Name,
@@ -11,18 +11,18 @@ namespace Api.Model.Courses.Dto
     );
 
     public sealed record UpdateCourseDto(
-        [Guid] Guid Id,
+        Guid Id,
         [StringLength(50, MinimumLength = 1)] string Name,
         [ValidDateOnly] DateOnly StartDateTime,
         [ValidDateOnly] DateOnly EndDateTime,
         string? Description 
         );
 
-    public sealed record CourseResponseDto(
-        [Guid] Guid Id,
-        [StringLength(50, MinimumLength = 1)] string Name,
+    public readonly record struct CourseResponseDto(
+        Guid Id,
+        string Name,
         string? Description,
-        [ValidDateOnly] DateOnly StartDateTime,
-        [ValidDateOnly] DateOnly EndDateTime
+        DateOnly StartDateTime,
+        DateOnly EndDateTime
     );
 }

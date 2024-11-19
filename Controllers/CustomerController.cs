@@ -109,7 +109,7 @@ public class CustomerController(AppDbContext context) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<Customer>> Patch(
         [FromRoute] string email,
-        [FromBody] PatchCustomerDto patchCustomerDto)
+        [FromBody] UpdateCustomerDto updateCustomerDto)
     {
         if (!ModelState.IsValid)
         {
@@ -128,7 +128,7 @@ public class CustomerController(AppDbContext context) : ControllerBase
         try
         {
             // Update customer properties
-            UpdateCustomerProperties(customer, patchCustomerDto);
+            UpdateCustomerProperties(customer, updateCustomerDto);
             context.Customers.Update(customer);
             await context.SaveChangesAsync();
 
@@ -145,14 +145,14 @@ public class CustomerController(AppDbContext context) : ControllerBase
     /// <summary>
     /// Helper method to update customer properties from the patch DTO
     /// </summary>
-    private static void UpdateCustomerProperties(Customer customer, PatchCustomerDto patchDto)
+    private static void UpdateCustomerProperties(Customer customer, UpdateCustomerDto updateCustomerDto)
     {
-        var patchProperties = typeof(PatchCustomerDto).GetProperties();
+        var patchProperties = typeof(UpdateCustomerDto).GetProperties();
         var customerType = typeof(Customer);
 
         foreach (var sourceProp in patchProperties)
         {
-            var value = sourceProp.GetValue(patchDto);
+            var value = sourceProp.GetValue(updateCustomerDto);
             if (value == null) continue;
 
             var customerProp = customerType.GetProperty(sourceProp.Name);

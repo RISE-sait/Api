@@ -1,5 +1,4 @@
 using Api.Model.Courses;
-using Api.Model.Courses.Dto;
 
 namespace Api.Mappers
 {

@@ -27,13 +27,12 @@ namespace Api.Model.CourseSchedules
         public TimeOnly EndTime { get; set; } = endTime;
     }
 
-    public struct ScheduleInfo
-    {
-        public Guid FacilityId;
-        public DaysInWeekEnum Day;
-        public DateOnly StartDate;
-        public DateOnly EndDate;
-        public TimeOnly BeginTime;
-        public TimeOnly EndTime;
-    }
+    public readonly record struct ScheduleDateTimes(
+    Guid FacilityId,
+    DaysInWeekEnum Day,
+    DateOnly StartDate, 
+    DateOnly EndDate,
+    TimeOnly BeginTime,
+    TimeOnly EndTime
+);
 }

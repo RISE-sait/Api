@@ -27,11 +27,11 @@ app.MapControllers();
 
 // Configure the HTTP request pipeline.
 
-if (IsDevelopment)
-{
+// if (IsDevelopment)
+// {
     app.MapOpenApi();
     app.MapScalarApiReference();
-}
+// }
 
 app.MapGet("/", () => "hey");
 

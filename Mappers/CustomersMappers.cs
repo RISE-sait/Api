@@ -14,27 +14,27 @@ namespace Api.Mappers
         /// <summary>
         /// Maps a CreateCustomerDto object to a Customer object.
         /// </summary>
-        /// <param name="createCustomerDto">The CreateCustomerDto object to map from.</param>
+        /// <param name="createCustomerRequest">The CreateCustomerDto object to map from.</param>
         /// <returns>A Customer object mapped from the CreateCustomerDto object.</returns>
-        public static Customer MapToCustomer(this CreateCustomerDto createCustomerDto)
+        public static Customer MapToCustomer(this CreateCustomerRequest request)
         {
             var customer = new Customer(
-                   name: createCustomerDto.Name,
-                   email: createCustomerDto.Email,
-                   phoneNumber: createCustomerDto.PhoneNumber,
-                   credit: createCustomerDto.Credit,
-                   balance: createCustomerDto.Balance
+                   name: request.Name,
+                   email: request.Email,
+                   phoneNumber: request.PhoneNumber,
+                   credit: request.Credit,
+                   balance: request.Balance
                )
             {
-                HasConsentMarketingEmails = createCustomerDto.HasConsentMarketingEmails,
-                HasConsentMarketingSms = createCustomerDto.HasConsentMarketingSms,
-                ShouldReceiveReceiptsForAllPayments = createCustomerDto.ShouldReceiveReceiptsForAllPayments
+                HasConsentMarketingEmails = request.HasConsentMarketingEmails,
+                HasConsentMarketingSms = request.HasConsentMarketingSms,
+                ShouldReceiveReceiptsForAllPayments = request.ShouldReceiveReceiptsForAllPayments
             };
 
-            if (createCustomerDto.FamilyId.HasValue && createCustomerDto.Role.HasValue)
+            if (request.FamilyId.HasValue && request.Role.HasValue)
             {
-                customer.FamilyId = createCustomerDto.FamilyId;
-                customer.Role = createCustomerDto.Role;
+                customer.FamilyId = request.FamilyId;
+                customer.Role = request.Role;
             }
 
             return customer;
@@ -45,9 +45,9 @@ namespace Api.Mappers
         /// </summary>
         /// <param name="customer">The Customer object to map from.</param>
         /// <returns>A ReturnCustomerDto object mapped from the Customer object.</returns>
-        public static ReturnCustomerDto MapToReturnCustomerDto(this Customer customer)
+        public static CustomerResponseDto MapToReturnCustomerDto(this Customer customer)
         {
-            return new ReturnCustomerDto
+            return new CustomerResponseDto
             {
                 Id = customer.Id,
                 Name = customer.Name,

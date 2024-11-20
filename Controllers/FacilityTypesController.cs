@@ -21,7 +21,7 @@ namespace Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(FacilityType), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateFacilityType([FromBody] CreateFacilityTypeDto createFacilityTypeDto)
+        public async Task<IActionResult> CreateFacilityType([FromBody] CreateFacilityTypeRequest createFacilityTypeDto)
         {
             if (!ModelState.IsValid)
             {

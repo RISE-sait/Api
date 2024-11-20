@@ -4,12 +4,12 @@ namespace Api.Mappers
 {
     public static class CourseMapper
     {
-         public static Course MapToCourse(this CreateCourseDto createCourseDto)
+         public static Course MapToCourse(this CreateCourseRequest request)
         {
             return new Course(
-                createCourseDto.Name,
-                createCourseDto.StartDateTime,
-                createCourseDto.EndDateTime
+                request.Name,
+                request.StartDateTime,
+                request.EndDateTime
             );
         }
 

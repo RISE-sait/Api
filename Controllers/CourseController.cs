@@ -64,14 +64,14 @@ namespace Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(CourseResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateCourse([FromBody] CreateCourseDto createCourseDto)
+        public async Task<IActionResult> CreateCourse([FromBody] CreateCourseRequest createCourseRequest)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            Course course = createCourseDto.MapToCourse();
+            Course course = createCourseRequest.MapToCourse();
             await context.Courses.AddAsync(course);
             await context.SaveChangesAsync();
 
@@ -91,7 +91,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateCourse([FromBody] UpdateCourseDto updateCourseDto)
+        public async Task<IActionResult> UpdateCourse([FromBody] UpdateCourseRequest request)
         {
             Console.WriteLine("UpdateCourse");
             if (!ModelState.IsValid)
@@ -105,16 +105,16 @@ namespace Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingCourse = await context.Courses.Where(c => c.Id == updateCourseDto.Id).FirstOrDefaultAsync();
+            var existingCourse = await context.Courses.Where(c => c.Id == request.Id).FirstOrDefaultAsync();
             if (existingCourse == null)
             {
                 return NotFound();
             }
 
-            existingCourse.Name = updateCourseDto.Name;
-            existingCourse.StartDateTime = updateCourseDto.StartDateTime;
-            existingCourse.EndDateTime = updateCourseDto.EndDateTime;
-            existingCourse.Description = updateCourseDto.Description;
+            existingCourse.Name = request.Name;
+            existingCourse.StartDateTime = request.StartDateTime;
+            existingCourse.EndDateTime = request.EndDateTime;
+            existingCourse.Description = request.Description;
 
             context.Courses.Update(existingCourse);
             await context.SaveChangesAsync();

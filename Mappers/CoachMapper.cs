@@ -4,13 +4,13 @@ namespace Api.Mappers
 {
     public static class CoachMapper
     {
-        public static Coach MapToCoach(this CreateCoachDto createCoachDto)
+        public static Coach MapToCoach(this CreateCoachRequest request)
         {
             return new Coach(
-                name: createCoachDto.Name,
-                email: createCoachDto.Email,
-                phoneNumber: createCoachDto.PhoneNumber,
-                createCoachDto.BankAccountNumber
+                name: request.Name,
+                email: request.Email,
+                phoneNumber: request.PhoneNumber,
+                request.BankAccountNumber
             );
         }
 

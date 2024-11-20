@@ -19,14 +19,14 @@ namespace Api.Controllers
         /// <param name="createCourseScheduleDto">The DTO containing the details of the course schedule to create.</param>
         /// <returns>An IActionResult indicating the result of the operation.</returns>
         [HttpPost()]
-        public async Task<ActionResult<CourseScheduleResponseDto>> CreateCourseSchedule([FromBody] CreateCourseScheduleDto createCourseScheduleDto)
+        public async Task<ActionResult<CourseScheduleResponseDto>> CreateCourseSchedule([FromBody] CreateCourseScheduleRequest createCourseScheduleRequest)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var courseSchedule = createCourseScheduleDto.MapToCourseSchedule();
+            var courseSchedule = createCourseScheduleRequest.MapToCourseSchedule();
 
             if (await ScheduleHelper.IsFacilityScheduleOverlapping(context, courseSchedule.MapToCourseScheduleDateTimes()))
             {
@@ -36,7 +36,7 @@ namespace Api.Controllers
             await context.CourseSchedules.AddAsync(courseSchedule);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetCourseScheduleById), new { courseSchedule });
+            return CreatedAtAction(nameof(GetCourseScheduleById), new { courseSchedule }, courseSchedule.MapToCourseScheduleResponse());
         }
 
         /// <summary>
@@ -54,6 +54,8 @@ namespace Api.Controllers
         {
             var existingCourseSchedule = await context.CourseSchedules
                             .Where(cs => cs.CourseId == courseId && cs.StartDate == startDate && cs.FacilityId == facilityId && cs.BeginTime == beginTime)
+                            .Include(cs => cs.Course)
+                            .Include(cs => cs.Coach)
                             .FirstOrDefaultAsync();
 
             if (existingCourseSchedule == null)
@@ -61,7 +63,7 @@ namespace Api.Controllers
                 return NotFound();
             }
 
-            return Ok(existingCourseSchedule);
+            return Ok(existingCourseSchedule.MapToCourseScheduleResponse());
         }
 
 
@@ -74,8 +76,8 @@ namespace Api.Controllers
         /// <param name="beginTime">The begin time of the course schedule.</param>
         /// <param name="updateCourseScheduleDto">The DTO containing the updated details of the course schedule.</param>
         /// <returns>An IActionResult indicating the result of the operation.</returns>
-        [HttpPatch()]
-        public async Task<IActionResult> UpdateCourseSchedule(Guid courseId, DateOnly startDate, Guid facilityId, TimeOnly beginTime, [FromBody] CreateCourseScheduleDto updateCourseScheduleDto)
+        [HttpPut]
+        public async Task<IActionResult> UpdateCourseSchedule(Guid courseId, DateOnly startDate, Guid facilityId, TimeOnly beginTime, [FromBody] CreateCourseScheduleRequest createCourseScheduleRequest)
         {
             if (!ModelState.IsValid)
             {
@@ -91,7 +93,7 @@ namespace Api.Controllers
                 return NotFound();
             }
 
-            var updatedScheduleInfo = updateCourseScheduleDto.MapToCourseSchedule().MapToCourseScheduleDateTimes();
+            var updatedScheduleInfo = createCourseScheduleRequest.MapToCourseSchedule().MapToCourseScheduleDateTimes();
 
             if (await ScheduleHelper.IsFacilityScheduleOverlapping(context, updatedScheduleInfo))
             {

@@ -5,9 +5,9 @@ namespace Api.Mappers
 {
     public static class FacilityTypeMapper
     {
-         public static FacilityType MapToFacilityType(this CreateFacilityTypeDto createFacilityTypeDto)
+         public static FacilityType MapToFacilityType(this CreateFacilityTypeRequest request)
         {
-            return new FacilityType(createFacilityTypeDto.Name);
+            return new FacilityType(request.Name);
         }
     }
 }

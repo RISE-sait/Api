@@ -20,9 +20,9 @@ public class CustomerController(AppDbContext context) : ControllerBase
     /// <response code="200">Returns the list of customers</response>
     /// <response code="400">If the limit parameter is invalid</response>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<ReturnCustomerDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<CustomerResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<IEnumerable<ReturnCustomerDto>> Get([FromQuery] int limit = 5)
+    public ActionResult<IEnumerable<CustomerResponseDto>> Get([FromQuery] int limit = 5)
     {
         // Validate the limit parameter
         if (limit != 5 && limit != 10 && limit != 20)
@@ -48,9 +48,9 @@ public class CustomerController(AppDbContext context) : ControllerBase
     /// <response code="200">Returns the requested customer</response>
     /// <response code="404">If the customer is not found</response>
     [HttpGet("by-email/{email}")]
-    [ProducesResponseType(typeof(ReturnCustomerDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CustomerResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ReturnCustomerDto>> GetByEmail(string email)
+    public async Task<ActionResult<CustomerResponseDto>> GetByEmail(string email)
     {
         // Find customer by email
         var customer = await context.Customers
@@ -76,7 +76,7 @@ public class CustomerController(AppDbContext context) : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(Customer), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<Customer> Post([FromBody] CreateCustomerDto createCustomerDto)
+    public ActionResult<Customer> Post([FromBody] CreateCustomerRequest createCustomerRequest)
     {
         // Validate the model state
         if (!ModelState.IsValid)
@@ -85,7 +85,7 @@ public class CustomerController(AppDbContext context) : ControllerBase
         }
 
         // Map DTO to Customer entity
-        var customer = createCustomerDto.MapToCustomer();
+        var customer = createCustomerRequest.MapToCustomer();
 
         // Add customer to database
         context.Customers.Add(customer);
@@ -103,13 +103,13 @@ public class CustomerController(AppDbContext context) : ControllerBase
     /// <response code="200">Returns the updated customer</response>
     /// <response code="400">If the model state is invalid</response>
     /// <response code="404">If the customer is not found</response>
-    [HttpPatch("{email}")]
+    [HttpPut]
     [ProducesResponseType(typeof(Customer), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Customer>> Patch(
+    public async Task<ActionResult<Customer>> Put(
         [FromRoute] string email,
-        [FromBody] UpdateCustomerDto updateCustomerDto)
+        [FromBody] UpdateCustomerRequest updateCustomerRequest)
     {
         if (!ModelState.IsValid)
         {
@@ -128,7 +128,7 @@ public class CustomerController(AppDbContext context) : ControllerBase
         try
         {
             // Update customer properties
-            UpdateCustomerProperties(customer, updateCustomerDto);
+            UpdateCustomerProperties(customer, updateCustomerRequest);
             context.Customers.Update(customer);
             await context.SaveChangesAsync();
 
@@ -145,14 +145,14 @@ public class CustomerController(AppDbContext context) : ControllerBase
     /// <summary>
     /// Helper method to update customer properties from the patch DTO
     /// </summary>
-    private static void UpdateCustomerProperties(Customer customer, UpdateCustomerDto updateCustomerDto)
+    private static void UpdateCustomerProperties(Customer customer, UpdateCustomerRequest updateCustomerRequest)
     {
-        var patchProperties = typeof(UpdateCustomerDto).GetProperties();
+        var patchProperties = typeof(UpdateCustomerRequest).GetProperties();
         var customerType = typeof(Customer);
 
         foreach (var sourceProp in patchProperties)
         {
-            var value = sourceProp.GetValue(updateCustomerDto);
+            var value = sourceProp.GetValue(updateCustomerRequest);
             if (value == null) continue;
 
             var customerProp = customerType.GetProperty(sourceProp.Name);

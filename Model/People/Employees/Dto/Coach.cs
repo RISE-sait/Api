@@ -9,7 +9,7 @@ namespace Api.Model.People.Employees.Dto
          [Phone] string PhoneNumber
      );
 
-    public readonly record struct CreateCoachDto(
+    public readonly record struct CreateCoachRequest(
       [MinLength(1)] string Name,
       [EmailAddress] string Email,
       [Phone] string PhoneNumber,
@@ -17,7 +17,7 @@ namespace Api.Model.People.Employees.Dto
         string BankAccountNumber
   );
 
-    public sealed record UpdateCoachDto(
+    public sealed record UpdateCoachRequest(
         Guid Id,
        [MinLength(1)] string Name,
        [EmailAddress] string Email,

@@ -8,13 +8,13 @@ namespace Api.Model.CourseSchedules
            Guid CoachId,
            Guid FacilityId,
            DaysInWeekEnum Day,
-           [ValidDateOnly] DateOnly StartDate,
-           [ValidDateOnly] DateOnly EndDate,
+           DateOnly StartDate,
+           DateOnly EndDate,
            TimeOnly BeginTime,
            TimeOnly EndTime
         );
 
-    public sealed record CreateCourseScheduleDto(
+    public sealed record CreateCourseScheduleRequest(
        Guid CourseId,
        Guid FacilityId,
        DaysInWeekEnum Day,

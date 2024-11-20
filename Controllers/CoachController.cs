@@ -60,7 +60,7 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(CoachResponseDto), 201)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        public async Task<ActionResult> Post([FromBody] CreateCoachDto createCoachDto)
+        public async Task<ActionResult> Post([FromBody] CreateCoachRequest createCoachDto)
         {
             if (!ModelState.IsValid)
             {
@@ -97,7 +97,7 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(Coach), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Update(UpdateCoachDto updateCoachDto)
+        public async Task<IActionResult> Update(UpdateCoachRequest updateCoachDto)
         {
             var existingCoach = context.Coaches.Where(c => c.Id == updateCoachDto.Id).FirstOrDefault();
             if (existingCoach == null)

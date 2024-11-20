@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Api.Model.Facilities.Dto
 {
-    public sealed record CreateFacilityTypeDto(
+    public sealed record CreateFacilityTypeRequest(
         [StringLength(30, MinimumLength = 1)] string Name
     );
 

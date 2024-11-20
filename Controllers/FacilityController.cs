@@ -60,7 +60,7 @@ namespace Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(FacilityResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateFacility([FromBody] CreateFacilityDto createFacilityDto)
+        public async Task<IActionResult> CreateFacility([FromBody] CreateFacilityRequest createFacilityDto)
         {
             if (!ModelState.IsValid)
             {
@@ -90,7 +90,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateFacility([FromBody] PutFacilityDto putFacilityDto)
+        public async Task<IActionResult> UpdateFacility([FromBody] PutFacilityRequest putFacilityDto)
         {
             if (!ModelState.IsValid)
             {

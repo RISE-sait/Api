@@ -9,16 +9,16 @@ namespace Api.Mappers
     public static class FacilityMapper
     {
         /// <summary>
-        /// Maps a <see cref="CreateFacilityDto"/> to a <see cref="Facility"/> entity.
+        /// Maps a <see cref="CreateFacilityRequest"/> to a <see cref="Facility"/> entity.
         /// </summary>
         /// <param name="createFacilityDto">The DTO containing the facility creation data.</param>
         /// <returns>A <see cref="Facility"/> entity populated with the data from the DTO.</returns>
-        public static Facility MapToFacility(this CreateFacilityDto createFacilityDto)
+        public static Facility MapToFacility(this CreateFacilityRequest request)
         {
             return new Facility(
-                createFacilityDto.Name,
-                createFacilityDto.Location,
-                createFacilityDto.FacilityTypeId
+                request.Name,
+                request.Location,
+                request.FacilityTypeId
             );
         }
         

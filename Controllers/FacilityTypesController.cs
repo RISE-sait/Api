@@ -2,11 +2,13 @@ using Api.Database;
 using Api.Mappers;
 using Api.Model.Facilities;
 using Api.Model.Facilities.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class FacilityTypesController(AppDbContext _context) : ControllerBase
@@ -71,9 +73,9 @@ namespace Api.Controllers
         /// <response code="200">Returns a list of all facility types.</response>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<FacilityType>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAllFacilityTypes()
+        public IActionResult GetAllFacilityTypes()
         {
-            var facilityTypes = await _context.FacilityTypes.ToListAsync();
+            var facilityTypes = _context.FacilityTypes.ToList();
             return Ok(facilityTypes);
         }
 

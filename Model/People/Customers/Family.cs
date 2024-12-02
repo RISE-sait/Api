@@ -1,11 +1,7 @@
-using System.ComponentModel.DataAnnotations.Schema;
+﻿namespace Api.Model.People.Customers;
 
-namespace Api.Model.People.Customers
+public struct Family(Guid id, IEnumerable<Customer> members)
 {
-    public class Family
-    {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; init; }
-        public List<Customer> Members { get; } = [];
-    }
+    public Guid Id { get; init; } = id;
+    public IEnumerable<Customer> Members { get; set; } = members;
 }

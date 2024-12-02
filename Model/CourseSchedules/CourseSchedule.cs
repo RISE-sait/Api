@@ -1,8 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Api.enums;
 using Api.Model.Courses;
-using Api.Model.Facilities;
-using Api.Model.People.Employees;
+using Api.Model.People.Staff;
 
 namespace Api.Model.CourseSchedules
 {
@@ -12,7 +11,7 @@ namespace Api.Model.CourseSchedules
         public Guid CourseId { get; set; } = courseId;
         public Course Course { get; set; } = null!;
 
-        public Coach Coach { get; set; } = null!;
+        public Staff Coach { get; set; } = null!;
 
         [ForeignKey("Coach")]
         public Guid CoachId { get; set; } = coachId;

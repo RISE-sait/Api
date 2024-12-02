@@ -1,48 +1,50 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static Api.Model.People.Customers.Customer;
 
 namespace Api.Model.People.Customers
 {
-    public class Customer : Account
+    [NotMapped]
+    public sealed class Customer(Guid id, string name, string email, string? phoneNumber = null, int credit = 0, int balance = 0, Guid? familyId = null, RolesEnum? role = null)
+    : Account(name, email, phoneNumber), IValidatableObject
     {
-        public Customer(string name, string email, string phoneNumber, int credit = 0, int balance = 0) : base(name, email, phoneNumber)
-        {
-            Credit = credit;
-            Balance = balance;
-        }
-
-        public Customer(string name, string email, Guid familyId, RolesEnum role, string? phoneNumber, int credit = 0, int balance = 0) : base(name, email)
-        {
-
-            if (role == RolesEnum.Parent && string.IsNullOrEmpty(phoneNumber))
-            {
-                throw new NotImplementedException();
-            }
-
-            if (!string.IsNullOrEmpty(phoneNumber)) {
-                PhoneNumber = phoneNumber;
-            }
-
-            FamilyId = familyId;
-            Role = role;
-            Credit = credit;
-            Balance = balance;
-        }
+        public Guid Id { get; init; } = id;
         public bool HasConsentMarketingEmails { get; set; }
         public bool HasConsentMarketingSms { get; set; }
         public bool ShouldReceiveReceiptsForAllPayments { get; set; }
-        public int Credit { get; set; }
-        public int Balance { get; set; }
+        public int Credit { get; set; } = credit;
+        public int Balance { get; set; } = balance;
         public BasicAthleteInfo? BasicAthleteInfo { get; set; }
         public AdvancedAthleteInfo? AdvancedAthleteInfo { get; set; }
+        public Guid? FamilyId { get; set; } = familyId;
 
-        [ForeignKey("Family")]
-        public Guid? FamilyId { get; set; }
+        [NotMapped]
         public Family? Family { get; set; }
-        public RolesEnum? Role { get; set; }
+        public RolesEnum? Role { get; set; } = role;
         public enum RolesEnum
         {
             Child,
             Parent
+        }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var results = new List<ValidationResult>();
+
+            if (FamilyId == null != (Role == null))
+            {
+                results.Add(new ValidationResult(
+                    "Both FamilyId and Role must be defined together, or both should be null.",
+                    [nameof(FamilyId), nameof(Role)]));
+            }
+
+
+            if (Role == RolesEnum.Parent && string.IsNullOrEmpty(PhoneNumber))
+            {
+                results.Add(new ValidationResult("Phone number is required for Parent role.", [nameof(PhoneNumber)]));
+            }
+
+            return results;
         }
     }
 }

@@ -2,9 +2,7 @@ using Api.Model;
 using Api.Model.Courses;
 using Api.Model.CourseSchedules;
 using Api.Model.Facilities;
-using Api.Model.People;
-using Api.Model.People.Customers;
-using Api.Model.People.Employees;
+using Api.Model.People.Staff;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Database
@@ -13,13 +11,8 @@ namespace Api.Database
     {
         public DbSet<Course> Courses { get; init; }
         public DbSet<CourseSchedule> CourseSchedules { get; init; }
-        public DbSet<Family> Families { get; init; }
-        public DbSet<Admin> Admins { get; init; }
-        public DbSet<SuperAdmin> SuperAdmins { get; init; }
-        public DbSet<Coach> Coaches { get; init; }
-        public DbSet<Customer> Customers { get; init; }
-        public DbSet<Account> Accounts { get; init; }
-
+        public DbSet<Staff> Staffs { get; init; }
+        public DbSet<StaffType> StaffTypes { get; init; }
         public DbSet<BasicAthleteInfo> BasicAthleteInfo { get; init; }
         public DbSet<AdvancedAthleteInfo> AdvancedAthleteInfo { get; init; }
 
@@ -34,16 +27,6 @@ namespace Api.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
-            modelBuilder.Entity<Admin>().ToTable("Admins");
-
-            modelBuilder.Entity<Coach>().ToTable("Coaches");
-
-            modelBuilder.Entity<Family>().HasMany(f => f.Members)
-                    .WithOne(m => m.Family)
-                    .HasForeignKey(m => m.FamilyId)
-                    .IsRequired(false);
-
             modelBuilder.Entity<CourseSchedule>().HasKey(cs =>
                new
                {

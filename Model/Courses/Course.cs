@@ -18,13 +18,5 @@ namespace Api.Model.Courses
         public DateOnly EndDateTime {get; set; } = endDateTime;
         
         public Collection<Customer> Customers {get; set; } = [];
-        
-        public void DepositCredit() {
-
-        }
-
-        public void SignWaiver() {
-            
-        }
     }
 }

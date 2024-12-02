@@ -6,6 +6,6 @@ namespace Api.Model.People.Customers.Dto
         string Name,
         string Email,
         string? PhoneNumber = null,
-        List<string>? FamilyMembers = null
+        IEnumerable<Customer>? FamilyMembers = null
     );
 }

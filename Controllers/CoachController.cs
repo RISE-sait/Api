@@ -1,7 +1,6 @@
 using Api.Database;
 using Api.Mappers;
-using Api.Model.People.Employees;
-using Api.Model.People.Employees.Dto;
+using Api.Model.People.Staff;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,10 +19,10 @@ namespace Api.Controllers
         /// <returns>A list of coaches.</returns>
         /// <response code="200">Returns the list of coaches</response>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<CoachResponseDto>), 200)]
-        public ActionResult<IEnumerable<CoachResponseDto>> Get()
+        [ProducesResponseType(typeof(IEnumerable<StaffResponseDto>), 200)]
+        public ActionResult<IEnumerable<StaffResponseDto>> Get()
         {
-            var coaches = context.Coaches.Select(c => c.MapToCoachResponse()).ToList();
+            var coaches = context.Staffs.Select(s => s.MapToCoachResponse()).ToList();
             return Ok(coaches);
         }
 
@@ -35,12 +34,12 @@ namespace Api.Controllers
         /// <response code="200">Returns the coach with the specified ID</response>
         /// <response code="404">If the coach is not found</response>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(CoachResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(StaffResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCoachById(Guid id)
         {
 
-            var coach = await context.Coaches.Where(c => c.Id == id).FirstOrDefaultAsync();
+            var coach = await context.Staffs.Where(c => c.Id == id).FirstOrDefaultAsync();
             if (coach == null)
             {
                 return NotFound();
@@ -57,10 +56,10 @@ namespace Api.Controllers
         /// <response code="201">Returns the newly created coach</response>
         /// <response code="400">If the model state is invalid</response>
         [HttpPost]
-        [ProducesResponseType(typeof(CoachResponseDto), 201)]
+        [ProducesResponseType(typeof(StaffResponseDto), 201)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        public async Task<ActionResult> Post([FromBody] CreateCoachRequest createCoachDto)
+        public async Task<ActionResult> Post([FromBody] CreateStaffRequest createCoachDto)
         {
             if (!ModelState.IsValid)
             {
@@ -70,9 +69,9 @@ namespace Api.Controllers
             try
             {
 
-                Coach coach = createCoachDto.MapToCoach();
+                Staff coach = createCoachDto.MapToCoach();
 
-                await context.Coaches.AddAsync(coach);
+                await context.Staffs.AddAsync(coach);
                 await context.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(GetCoachById), new { id = coach.Id }, coach.MapToCoachResponse());
@@ -94,12 +93,12 @@ namespace Api.Controllers
         /// <response code="400">If the ID in the URL does not match the ID in the coach object</response>
         /// <response code="404">If the coach is not found</response>
         [HttpPut]
-        [ProducesResponseType(typeof(Coach), 200)]
+        [ProducesResponseType(typeof(Staff), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Update(UpdateCoachRequest updateCoachDto)
+        public async Task<IActionResult> Update(UpdateStaffRequest updateCoachDto)
         {
-            var existingCoach = context.Coaches.Where(c => c.Id == updateCoachDto.Id).FirstOrDefault();
+            var existingCoach = context.Staffs.Where(c => c.Id == updateCoachDto.Id).FirstOrDefault();
             if (existingCoach == null)
             {
                 return NotFound(new { Message = "Coach not found" });
@@ -108,9 +107,9 @@ namespace Api.Controllers
             existingCoach.Name = updateCoachDto.Name;
             existingCoach.PhoneNumber = updateCoachDto.PhoneNumber;
             existingCoach.ProfilePic = updateCoachDto.ProfilePic;
-            existingCoach.BankAccountNumber = updateCoachDto.BankAccountNumber;
+            existingCoach.StaffTypeId = updateCoachDto.StaffTypeId;
 
-            context.Coaches.Update(existingCoach);
+            context.Staffs.Update(existingCoach);
             await context.SaveChangesAsync();
 
             return NoContent();
@@ -127,13 +126,13 @@ namespace Api.Controllers
         [ProducesResponseType(404)]
         public ActionResult Delete(Guid id)
         {
-            var coach = context.Coaches.Find(id);
+            var coach = context.Staffs.Find(id);
             if (coach == null)
             {
                 return NotFound(new { Message = "Coach not found" });
             }
 
-            context.Coaches.Remove(coach);
+            context.Staffs.Remove(coach);
             context.SaveChanges();
 
             return NoContent();

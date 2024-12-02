@@ -22,7 +22,7 @@ namespace Api.Tests
             {
                 Helper.TruncateTables(context);
 
-                context.Coaches.AddRange(coaches);
+                context.Staffs.AddRange(coaches);
                 context.Courses.AddRange(courses);
                 context.Facilities.AddRange(facilities);
 
@@ -86,7 +86,7 @@ namespace Api.Tests
             {
                 Helper.TruncateTables(context);
 
-                context.Coaches.AddRange(coaches);
+                context.Staffs.AddRange(coaches);
                 context.Courses.AddRange(courses);
                 context.Facilities.AddRange(facilities);
 

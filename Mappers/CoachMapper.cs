@@ -1,22 +1,22 @@
-using Api.Model.People.Employees;
-using Api.Model.People.Employees.Dto;
+using Api.Model.People.Staff;
+
 namespace Api.Mappers
 {
     public static class CoachMapper
     {
-        public static Coach MapToCoach(this CreateCoachRequest request)
+        public static Staff MapToCoach(this CreateStaffRequest request)
         {
-            return new Coach(
+            return new Staff(
                 name: request.Name,
                 email: request.Email,
                 phoneNumber: request.PhoneNumber,
-                request.BankAccountNumber
+                request.StaffTypeId
             );
         }
 
-         public static CoachResponseDto MapToCoachResponse(this Coach coach)
+         public static StaffResponseDto MapToCoachResponse(this Staff coach)
         {
-            return new CoachResponseDto(
+            return new StaffResponseDto(
                 coach.Id,
                 coach.Name,
                 coach.Email,

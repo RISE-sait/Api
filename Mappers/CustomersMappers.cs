@@ -19,6 +19,7 @@ namespace Api.Mappers
         public static Customer MapToCustomer(this CreateCustomerRequest request)
         {
             var customer = new Customer(
+                id: request.Id,
                    name: request.Name,
                    email: request.Email,
                    phoneNumber: request.PhoneNumber,
@@ -49,11 +50,10 @@ namespace Api.Mappers
         {
             return new CustomerResponseDto
             {
-                Id = customer.Id,
                 Name = customer.Name,
                 Email = customer.Email,
                 PhoneNumber = customer.PhoneNumber,
-                FamilyMembers = customer.Family?.Members != null ? customer.Family.Members.Select(m => m.Name).ToList() : null
+                FamilyMembers = [.. customer.Family.HasValue ? customer.Family.Value.Members : []]
             };
         }
     }

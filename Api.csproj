@@ -17,5 +17,8 @@
     <PackageReference Include="Riok.Mapperly" Version="4.1.1-next.0"/>
     <PackageReference Include="Scalar.AspNetCore" Version="1.2.39"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0-rc.2.24474.1"/>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0"/>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1"/>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.0"/>
   </ItemGroup>
 </Project>

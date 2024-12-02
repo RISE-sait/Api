@@ -1,7 +1,7 @@
 using Api.Model.Courses;
 using Api.Model.Facilities;
 using Api.Model.People.Customers;
-using Api.Model.People.Employees;
+using Api.Model.People.Staff;
 using Bogus;
 
 namespace Api.Tests
@@ -16,17 +16,21 @@ namespace Api.Tests
                 return new Faker<Customer>()
                 .CustomInstantiator(f =>
                     new Customer(
+                    f.Random.Guid(),
                         f.Person.FullName,
                         f.Internet.Email(),
+                        f.Phone.PhoneNumber("##########"),
+                        0,
+                        0,
                         familiesForRandPick[new Random().Next(familiesForRandPick.Count)].Id,
-                        rolesForRandPick[new Random().Next(rolesForRandPick.Count)],
-                        f.Phone.PhoneNumber("##########")
+                        rolesForRandPick[new Random().Next(rolesForRandPick.Count)]
                     )).Generate(count);
             }
 
             return new Faker<Customer>()
                 .CustomInstantiator(f =>
                     new Customer(
+                    f.Random.Guid(),
                         f.Person.FullName,
                         f.Internet.Email(),
                         f.Phone.PhoneNumber("##########")
@@ -45,15 +49,15 @@ namespace Api.Tests
             return families;
         }
 
-        public static List<Coach> GenerateCoaches(int amt)
+        public static List<Staff> GenerateCoaches(int amt)
         {
-            return new Faker<Coach>()
+            return new Faker<Staff>()
                 .CustomInstantiator(f =>
-                    new Coach(
+                    new Staff(
                         f.Person.FullName,
                         f.Internet.Email(),
                         f.Phone.PhoneNumber("##########"),
-                        f.Finance.Account()
+                    f.Random.Guid()
                     )).Generate(amt);
         }
 
@@ -69,14 +73,14 @@ namespace Api.Tests
                 .Generate(count);
         }
 
-        public static List<Admin> GenerateAdmins(int count)
+        public static List<Staff> GenerateAdmins(int count)
         {
-            return new Faker<Admin>().CustomInstantiator(f =>
-                new Admin(
+            return new Faker<Staff>().CustomInstantiator(f =>
+                new Staff(
                     f.Person.FullName,
                     f.Internet.Email(),
                     f.Phone.PhoneNumber("##########"),
-                    f.Finance.Account()
+                    f.Random.Guid()
                 )).Generate(count);
         }
 

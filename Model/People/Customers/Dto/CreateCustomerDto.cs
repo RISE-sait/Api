@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Api.Model.People.Customers.Dto
 {
     public sealed record CreateCustomerRequest(
+        Guid Id,
         [MinLength(1)] string Name,
         [EmailAddress] string Email,
         [Phone] string PhoneNumber,

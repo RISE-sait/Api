@@ -2,7 +2,6 @@ using System.Text;
 using Api.Database;
 using Api.helpers;
 using dotenv.net;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -24,24 +23,22 @@ var IsDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     }
 )
- .AddJwtBearer(options =>
- {
-     options.TokenValidationParameters = new TokenValidationParameters
-     {
-         ValidateIssuer = true,
-         ValidateAudience = true,
-         ValidateLifetime = true,
-         ValidateIssuerSigningKey = true,
-         ValidIssuer = jwtIssuer,
-         ValidAudience = jwtIssuer,
-         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-     };
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtIssuer,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
 
-     options.Events = new JwtBearerEvents
+    options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
@@ -50,15 +47,26 @@ builder.Services.AddAuthentication(options =>
             {
                 context.Token = token;
             }
+            else
+            {
+                Console.WriteLine("JWT token not found in cookie. Checking Authorization header.");
+                var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
+                if (!string.IsNullOrEmpty(authHeader))
+                {
+                    context.Token = authHeader.Split(" ").Last();
+                }
+            }
             return Task.CompletedTask;
         }
     };
- })
+})
+.AddCookie("TemporaryCookie")
  .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
 {
     options.ClientId = configuration["Authentication:Google:ClientId"];
     options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-}).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+    options.SignInScheme = "TemporaryCookie";
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();

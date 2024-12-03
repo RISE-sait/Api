@@ -14,12 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
-var jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
-var jwtKey = builder.Configuration.GetSection("Jwt:Key").Get<string>() ?? throw new ArgumentNullException("Jwt:Key");
+var jwtIssuer = configuration["Jwt:Issuer"];
+var jwtKey = configuration["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key");
 
-var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
-
-var IsDevelopment = environment == "Development";
+var IsDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
 
 // Add services to the container.
 
@@ -27,7 +25,7 @@ builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme; // Add this line
+        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     }
 )
  .AddJwtBearer(options =>
@@ -42,12 +40,24 @@ builder.Services.AddAuthentication(options =>
          ValidAudience = jwtIssuer,
          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
      };
+
+     options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var token = context.Request.Cookies["jwtToken"];
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Token = token;
+            }
+            return Task.CompletedTask;
+        }
+    };
  })
  .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
 {
     options.ClientId = configuration["Authentication:Google:ClientId"];
     options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-    options.CallbackPath = "/signin-google";
 }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
 
 builder.Services.AddEndpointsApiExplorer();

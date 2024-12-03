@@ -15,7 +15,7 @@ namespace Api.Controllers
         [HttpGet("login")]
         public IActionResult Login()
         {
-            var redirectUrl = Url.Action("GoogleResponse", "Auth");
+            var redirectUrl = Url.Action(nameof(GoogleResponse));
             var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
@@ -29,14 +29,19 @@ namespace Api.Controllers
 
             // Extract user information from the result
             var claims = result.Principal.Identities
-                .FirstOrDefault()?.Claims.Select(claim => new
-                {
-                    claim.Type,
-                    claim.Value
-                }).ToList();
+                .FirstOrDefault()?.Claims;
 
-            var jwtClaims = claims.Select(c => new Claim(c.Type, c.Value));
-            var token = GenerateJwtToken(jwtClaims);
+            if (claims == null)
+                return BadRequest();
+
+            var token = GenerateJwtToken(claims);
+
+            Response.Cookies.Append("jwtToken", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Strict
+            });
 
             // Return the token
             return Ok(new { token });

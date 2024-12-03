@@ -68,7 +68,8 @@ namespace Api.Tests
                     new Course(
                         f.Commerce.ProductName(),
                         DateOnly.FromDateTime(f.Date.Future()),
-                        DateOnly.FromDateTime(f.Date.Past())
+                        DateOnly.FromDateTime(f.Date.Past()),
+                        f.Lorem.Sentence()
                     ))
                 .Generate(count);
         }

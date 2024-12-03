@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "RequireAdmin")]
     [ApiController]
     [Route("api/[controller]")]
     public class FacilityTypesController(AppDbContext _context) : ControllerBase

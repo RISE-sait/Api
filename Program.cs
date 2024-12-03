@@ -17,11 +17,19 @@ var IsDevelopment = configuration["Environment:Environment"] == "Development";
 
 // Add services to the container.
 
-builder.Services.AddAuthenticationServices(configuration);
+services.AddAuthenticationServices(configuration);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
-builder.Services.AddControllers().AddJsonOptions(options =>
+services.AddAuthorizationBuilder()
+.AddPolicy("RequireAdmin", policy =>
+        policy.RequireClaim("staffTypeName", "Admin"))
+.AddPolicy("RequireSuperAdmin", policy =>
+    policy.RequireClaim("staffTypeName", "SuperAdmin"))
+.AddPolicy("RequireCoach", policy =>
+    policy.RequireClaim("staffTypeName", "Coach"));
+
+services.AddEndpointsApiExplorer();
+services.AddOpenApi();
+services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
     options.JsonSerializerOptions.Converters.Add(new GuidJsonConverter());

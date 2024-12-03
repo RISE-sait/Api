@@ -1,6 +1,7 @@
 using Api.Database;
 using Api.Mappers;
 using Api.Model.People.Staff;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ namespace Api.Controllers
     /// Handles HTTP requests related to Coach entities.
     /// </summary>
     [ApiController]
+    [Authorize(Policy = "RequireAdmin")]
     [Route("api/[controller]")]
     public class CoachController(AppDbContext context, ILogger<CoachController> logger) : ControllerBase
     {

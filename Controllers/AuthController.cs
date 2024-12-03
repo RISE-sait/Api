@@ -1,45 +1,61 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Google;
+using Api.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
-    public class AuthController(IConfiguration configuration) : ControllerBase
+    public class AuthController(AppDbContext dbContext, IConfiguration configuration) : ControllerBase
     {
-        [HttpGet("login")]
+        private const string JwtKeyConfig = "Jwt:Key";
+        private const string JwtIssuerConfig = "Jwt:Issuer";
+        private const string EnvironmentConfig = "Environment:Environment";
+
+        [HttpPost("exchange-jwt")]
         public IActionResult Login()
         {
-            var redirectUrl = Url.Action(nameof(GoogleResponse));
-            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
-        }
+            if (dbContext == null)
+                return BadRequest("Database context is not available.");
 
-        [HttpGet("google-response")]
-        public async Task<IActionResult> GoogleResponse()
-        {
-            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-            if (!result.Succeeded)
-                return BadRequest(); // Handle error
+            var principal = HttpContext.User;
 
-            // Extract user information from the result
-            var claims = result.Principal.Identities
-                .FirstOrDefault()?.Claims;
+            if (principal.Identity == null)
+                return BadRequest("Invalid token");
 
-            if (claims == null)
-                return BadRequest();
+            if (!principal.Identity.IsAuthenticated)
+                return BadRequest("Invalid token");
+
+            var email = principal.FindFirst(ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(email))
+                return BadRequest("Invalid token: Email claim not found.");
+
+            var staff = dbContext.Staffs.Include(s => s.StaffType).FirstOrDefault(s => s.Email == email);
+            if (staff == null)
+            {
+                return BadRequest("Invalid token: Staff not found.");
+            }
+
+            var claims = principal.Claims
+                   .Where(c => c.Type != JwtRegisteredClaimNames.Aud)
+                   .ToList();
+
+            claims.Add(new Claim("staffTypeName", staff.StaffType.Name));
 
             var token = GenerateJwtToken(claims);
 
+            // Set the JWT token as a cookie
             Response.Cookies.Append("jwtToken", token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = configuration["Environment:Environment"] != "Development",
+                Secure = configuration[EnvironmentConfig] != "Development",
                 SameSite = SameSiteMode.Strict
             });
 
@@ -49,12 +65,12 @@ namespace Api.Controllers
 
         private string GenerateJwtToken(IEnumerable<Claim> claims)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration[JwtKeyConfig]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: configuration["Jwt:Issuer"],
-                audience: configuration["Jwt:Issuer"],
+                issuer: configuration[JwtIssuerConfig],
+                audience: configuration[JwtIssuerConfig],
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(30),
                 signingCredentials: creds);

@@ -58,3 +58,5 @@ project.fragment.lock.json
 *.o
 *.so
 *.dSYM
+
+appsettings.json

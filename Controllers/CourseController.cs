@@ -25,9 +25,9 @@ namespace Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(CourseResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetCourses()
+        public IActionResult GetCourses()
         {
-            var courses = await context.Courses.Select(c => c.MapToCourseResponse()).ToListAsync();
+            var courses = context.Courses.Select(c => c.MapToCourseResponse()).ToList();
 
             return Ok(courses);
         }

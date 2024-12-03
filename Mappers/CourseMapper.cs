@@ -9,7 +9,8 @@ namespace Api.Mappers
             return new Course(
                 request.Name,
                 request.StartDateTime,
-                request.EndDateTime
+                request.EndDateTime,
+                request.Description
             );
         }
 

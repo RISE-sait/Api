@@ -39,7 +39,7 @@ namespace Api.Controllers
             Response.Cookies.Append("jwtToken", token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = configuration["Environment:Environment"] != "Development",
                 SameSite = SameSiteMode.Strict
             });
 

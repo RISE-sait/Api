@@ -5,8 +5,6 @@ namespace Api.Model.Facilities
 {
     public class Facility(string name, string location, Guid facilityTypeId)
     {
-
-        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; init; }
 

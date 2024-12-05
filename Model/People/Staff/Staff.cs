@@ -6,9 +6,9 @@ namespace Api.Model.People.Staff
         
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; init; }
+        
+        [ForeignKey("StaffType")]
         public Guid StaffTypeId { get; set; } = staffTypeId;
-
-        [ForeignKey("StaffTypeId")]
         public StaffType StaffType { get; set; } = null!;
     }
 }

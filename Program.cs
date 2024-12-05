@@ -10,23 +10,19 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
-var jwtIssuer = configuration["Jwt:Issuer"];
-var jwtKey = configuration["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key");
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())  // Ensure the correct directory is used
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true) // Load appsettings.json
+    .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true) // Environment-specific settings
+    .AddJsonFile("secrets.json", optional: true, reloadOnChange: true) // Environment-specific settings
+    .AddEnvironmentVariables();
 
-var IsDevelopment = configuration["Environment:Environment"] == "Development";
+var isDevelopment = configuration["Environment"] == "Development";
 
 // Add services to the container.
 
-services.AddAuthenticationServices(configuration);
-
-services.AddAuthorizationBuilder()
-.AddPolicy("RequireAdmin", policy =>
-        policy.RequireClaim("staffTypeName", "Admin"))
-.AddPolicy("RequireSuperAdmin", policy =>
-    policy.RequireClaim("staffTypeName", "SuperAdmin"))
-.AddPolicy("RequireCoach", policy =>
-    policy.RequireClaim("staffTypeName", "Coach"));
-
+services.AddAuthentication(configuration);
+services.AddStripeServices(configuration);
 services.AddEndpointsApiExplorer();
 services.AddOpenApi();
 services.AddControllers().AddJsonOptions(options =>
@@ -35,21 +31,21 @@ services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(new GuidJsonConverter());
 });
 
-builder.Services.AddDbContext<AppDbContext>();
+services.AddDbContext<AppDbContext>();
 
 var app = builder.Build();
 
 app.UseAuthentication();
-app.UseAuthorization();
 app.MapControllers();
 
 // Configure the HTTP request pipeline.
 
-if (IsDevelopment)
+if (isDevelopment)
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
 
 app.MapGet("/", () => "hey");
 

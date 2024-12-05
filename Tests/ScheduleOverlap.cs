@@ -8,26 +8,50 @@ namespace Api.Tests
 {
     public class ScheduleOverlap
     {
+        private readonly ServiceProvider _serviceProvider;
+        public ScheduleOverlap()
+        {
+            // Setup DI
+            var services = new ServiceCollection();
+
+            // Add your configuration sources here
+            var configurationSetting = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            // Register the DbContext
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(configurationSetting["Environment:ConnectionStrings:DefaultConnection"]));
+
+            // Add other necessary services
+            services.AddSingleton<IConfiguration>(configurationSetting);
+
+            // Build the ServiceProvider
+            _serviceProvider = services.BuildServiceProvider();
+        }
 
         [Fact]
         public async Task AddCourseScheduleOverlap_Show_Throw_Error()
         {
-            var options = AppDbContext.GetLocalDbContextOptions();
+            // Resolve dependencies using DI
+            var dbContext = _serviceProvider.GetRequiredService<AppDbContext>();
 
             var coaches = InstancesGenerators.GenerateCoaches(5);
             var courses = InstancesGenerators.GenerateCourses(5);
             var facilities = InstancesGenerators.GenerateFacilities(5);
 
-            await using (var context = new AppDbContext(options))
+            // Use resolved dependencies
+            await using (dbContext)
             {
-                Helper.TruncateTables(context);
+                Helper.TruncateTables(dbContext);
 
-                context.Staffs.AddRange(coaches);
-                context.Courses.AddRange(courses);
-                context.Facilities.AddRange(facilities);
+                dbContext.Staffs.AddRange(coaches);
+                dbContext.Courses.AddRange(courses);
+                dbContext.Facilities.AddRange(facilities);
 
-                await context.SaveChangesAsync();
-                
+                await dbContext.SaveChangesAsync();
+
                 // Add non-overlapping course schedules
                 var courseSchedule1 = new CourseSchedule(
                     courses[0].Id,
@@ -51,10 +75,7 @@ namespace Api.Tests
                     coaches[1].Id
                 );
 
-                // await coach.AddCourseSchedule(context, courseSchedule1);
-                // await coach.AddCourseSchedule(context, courseSchedule2);
-
-                await context.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
 
                 // Attempt to add an overlapping course schedule
                 var overlappingCourseSchedule = new CourseSchedule(
@@ -68,7 +89,7 @@ namespace Api.Tests
                     coaches[2].Id
                 );
 
-                // await Assert.ThrowsAsync<InvalidOperationException>(() => coach.AddCourseSchedule(context, overlappingCourseSchedule));
+                // await Assert.ThrowsAsync<InvalidOperationException>(() => coach.AddCourseSchedule(dbContext, overlappingCourseSchedule));
 
             }
         }
@@ -76,23 +97,22 @@ namespace Api.Tests
         [Fact]
         public async Task AddCourseScheduleOverlap_Show_Not_Throw_Error()
         {
-            var options = AppDbContext.GetLocalDbContextOptions();
+            // Resolve dependencies using DI
+            var dbContext = _serviceProvider.GetRequiredService<AppDbContext>();
 
             var coaches = InstancesGenerators.GenerateCoaches(5);
             var courses = InstancesGenerators.GenerateCourses(5);
             var facilities = InstancesGenerators.GenerateFacilities(5);
 
-            await using (var context = new AppDbContext(options))
+            await using (dbContext)
             {
-                Helper.TruncateTables(context);
+                Helper.TruncateTables(dbContext);
 
-                context.Staffs.AddRange(coaches);
-                context.Courses.AddRange(courses);
-                context.Facilities.AddRange(facilities);
+                dbContext.Staffs.AddRange(coaches);
+                dbContext.Courses.AddRange(courses);
+                dbContext.Facilities.AddRange(facilities);
 
-                await context.SaveChangesAsync();
-
-                // ICoach coach = coaches[0];
+                await dbContext.SaveChangesAsync();
 
                 // Add non-overlapping course schedules
                 var courseSchedule1 = new CourseSchedule(
@@ -117,10 +137,7 @@ namespace Api.Tests
                     coaches[1].Id
                 );
 
-                // await coach.AddCourseSchedule(context, courseSchedule1);
-                // await coach.AddCourseSchedule(context, courseSchedule2);
-
-                await context.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
 
                 // Attempt to add a non-overlapping course schedule
                 var newCourseSchedule = new CourseSchedule(
@@ -134,11 +151,9 @@ namespace Api.Tests
                     coaches[2].Id
                 );
 
-                // await coach.AddCourseSchedule(context, newCourseSchedule);
+                await dbContext.SaveChangesAsync();
 
-                await context.SaveChangesAsync();
-
-                var schedulesCount = await context.CourseSchedules.CountAsync();
+                var schedulesCount = await dbContext.CourseSchedules.CountAsync();
                 Assert.Equal(3, schedulesCount);
             }
         }

@@ -1,7 +1,6 @@
 # Build results
 /bin/
 /obj/
-/Migrations/
 
 # Visual Studio files
 *.suo
@@ -58,5 +57,3 @@ project.fragment.lock.json
 *.o
 *.so
 *.dSYM
-
-appsettings.json

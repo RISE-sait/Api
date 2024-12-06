@@ -17,5 +17,6 @@ namespace Api.Model.Memberships
         public DateOnly StartDateTime { get; set; } = startDateTime;
         public DateOnly EndDateTime { get; set; } = endDateTime;
 
+        public ICollection<MembershipPlan> MembershipPlans { get; set; } = [];
     }
 }

@@ -4,7 +4,6 @@ using Api.Model.CourseSchedules;
 using Api.Model.Facilities;
 using Api.Model.Memberships;
 using Api.Model.People.Staff;
-using Api.Model.Permissions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Database
@@ -16,7 +15,6 @@ namespace Api.Database
         public DbSet<CourseSchedule> CourseSchedules { get; init; }
         public DbSet<Staff> Staffs { get; init; }
         public DbSet<StaffType> StaffTypes { get; init; }
-        public DbSet<StaffPermissions> StaffPermissions { get; init; }
         public DbSet<BasicAthleteInfo> BasicAthleteInfo { get; init; }
         public DbSet<AdvancedAthleteInfo> AdvancedAthleteInfo { get; init; }
 

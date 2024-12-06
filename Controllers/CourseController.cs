@@ -1,10 +1,8 @@
-using Api.Attributes;
 using Api.Database;
 using Api.Mappers;
 using Api.Model.Courses;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StaffTypeEnum = Api.Enums.StaffType;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers
 {
@@ -12,7 +10,6 @@ namespace Api.Controllers
     /// Controller for managing courses.
     /// </summary>
     /// <param name="context">The database context.</param>
-    [AuthorizeRoles([StaffTypeEnum.Admin])]
     [ApiController]
     [Route("api/[controller]")]
     public class CourseController(AppDbContext context) : ControllerBase
@@ -26,7 +23,6 @@ namespace Api.Controllers
         /// <response code="404">If the course is not found.</response>
 
         [HttpGet]
-        [AllowAnonymous]
         [ProducesResponseType(typeof(CourseResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetCourses()
@@ -44,13 +40,12 @@ namespace Api.Controllers
         /// <response code="200">Returns the course with the specified ID.</response>
         /// <response code="404">If the course is not found.</response>
 
-        [HttpGet("{id:guid}")]
-        [AllowAnonymous]
+        [HttpGet("{id}")]
         [ProducesResponseType(typeof(CourseResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetCourseById(Guid id)
+        public async Task<IActionResult> GetCourseById(Guid id)
         {
-            var course = context.Courses.SingleOrDefault(c => c.Id == id);
+            var course = await context.Courses.SingleAsync(c => c.Id == id);
             if (course == null)
             {
                 return NotFound();
@@ -62,21 +57,21 @@ namespace Api.Controllers
         /// <summary>
         /// Creates a new course.
         /// </summary>
-        /// <param name="request">The data transfer object containing the course details.</param>
+        /// <param name="createCourseDto">The data transfer object containing the course details.</param>
         /// <returns>The created course.</returns>
         /// <response code="201">Returns the newly created course.</response>
         /// <response code="400">If the model state is invalid.</response>
         [HttpPost]
         [ProducesResponseType(typeof(CourseResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateCourse([FromBody] CreateCourseRequest request)
+        public async Task<IActionResult> CreateCourse([FromBody] CreateCourseRequest createCourseRequest)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var course = request.MapToCourse();
+            Course course = createCourseRequest.MapToCourse();
             await context.Courses.AddAsync(course);
             await context.SaveChangesAsync();
 
@@ -86,7 +81,8 @@ namespace Api.Controllers
         /// <summary>
         /// Updates an existing course.
         /// </summary>
-        /// <param name="request">The data transfer object containing the updated course details.</param>
+        /// <param name="id">The ID of the course to update.</param>
+        /// <param name="updateCourseDto">The data transfer object containing the updated course details.</param>
         /// <returns>No content if the update is successful.</returns>
         /// <response code="204">If the update is successful.</response>
         /// <response code="400">If the model state is invalid.</response>
@@ -95,16 +91,21 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult UpdateCourse([FromBody] UpdateCourseRequest request)
+        public async Task<IActionResult> UpdateCourse([FromBody] UpdateCourseRequest request)
         {
+            Console.WriteLine("UpdateCourse");
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                foreach (var error in errors)
+                {
+                    Console.WriteLine(error);
+                }
 
                 return BadRequest(ModelState);
             }
 
-            var existingCourse = context.Courses.FirstOrDefault(c => c.Id == request.Id);
+            var existingCourse = await context.Courses.Where(c => c.Id == request.Id).FirstOrDefaultAsync();
             if (existingCourse == null)
             {
                 return NotFound();
@@ -116,7 +117,7 @@ namespace Api.Controllers
             existingCourse.Description = request.Description;
 
             context.Courses.Update(existingCourse);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             return NoContent();
         }
@@ -128,20 +129,19 @@ namespace Api.Controllers
         /// <returns>No content if the deletion is successful.</returns>
         /// <response code="204">If the deletion is successful.</response>
         /// <response code="404">If the course is not found.</response>
-        [HttpDelete("{id:guid}")]
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult DeleteCourse(Guid id)
+        public async Task<IActionResult> DeleteCourse(Guid id)
         {
-            var course = context.Courses.SingleOrDefault(c => c.Id == id);
+            var course = await context.Courses.SingleAsync(c => c.Id == id);
             if (course == null)
             {
                 return NotFound();
             }
 
             context.Courses.Remove(course);
-            context.SaveChanges();
-
+            await context.SaveChangesAsync();
             return NoContent();
         }
     }

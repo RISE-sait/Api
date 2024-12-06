@@ -1,15 +1,17 @@
+using Api.Attributes;
 using Api.Database;
 using Api.Mappers;
 using Api.Model.Facilities;
 using Api.Model.Facilities.Dto;
-using LanguageExt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StaffTypeEnum = Api.Enums.StaffType;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [AuthorizeRoles([StaffTypeEnum.Admin])]
     public class FacilityController(AppDbContext context) : ControllerBase
     {
 
@@ -19,6 +21,7 @@ namespace Api.Controllers
         /// <returns>A list of all facilities.</returns>
         /// <response code="200">Returns a list of all facilities.</response>
         [HttpGet]
+        [AuthorizeRoles([StaffTypeEnum.Coach])]
         [ProducesResponseType(typeof(IEnumerable<Facility>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllFacilitiesAsync(int limit = 5)
         {
@@ -36,7 +39,8 @@ namespace Api.Controllers
         /// <returns>The facility with the specified ID.</returns>
         /// <response code="200">Returns the facility with the specified ID.</response>
         /// <response code="404">If the facility is not found.</response>
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
+        [AuthorizeRoles([StaffTypeEnum.Coach])]
         [ProducesResponseType(typeof(FacilityResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetFacilityById(Guid id)
@@ -67,7 +71,7 @@ namespace Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            Facility facility = createFacilityDto.MapToFacility();
+            var facility = createFacilityDto.MapToFacility();
 
             await context.Facilities.AddAsync(facility);
             await context.SaveChangesAsync();
@@ -80,8 +84,7 @@ namespace Api.Controllers
         /// <summary>
         /// Updates an existing facility.
         /// </summary>
-        /// <param name="id">The ID of the facility to update.</param>
-        /// <param name="updateFacilityDto">The DTO containing the updated facility data.</param>
+        /// <param name="request">The DTO containing the updated facility data.</param>
         /// <returns>No content.</returns>
         /// <response code="204">If the update is successful.</response>
         /// <response code="400">If the model state is invalid.</response>
@@ -90,24 +93,24 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateFacility([FromBody] PutFacilityRequest putFacilityDto)
+        public async Task<IActionResult> UpdateFacility([FromBody] PutFacilityRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var existingFacility = await context.Facilities.Where(f => f.Id == putFacilityDto.FacilityId).FirstOrDefaultAsync();
-            var facilityType = await context.FacilityTypes.Where(ft => ft.Id == putFacilityDto.FacilityTypeId).FirstOrDefaultAsync();
+            var existingFacility = await context.Facilities.Where(f => f.Id == request.FacilityId).FirstOrDefaultAsync();
+            var facilityType = await context.FacilityTypes.Where(ft => ft.Id == request.FacilityTypeId).FirstOrDefaultAsync();
 
             if (existingFacility == null || facilityType == null)
             {
                 return NotFound();
             }
 
-            existingFacility.Name = putFacilityDto.Name;
-            existingFacility.Location = putFacilityDto.Location;
-            existingFacility.FacilityTypeId = putFacilityDto.FacilityTypeId;
+            existingFacility.Name = request.Name;
+            existingFacility.Location = request.Location;
+            existingFacility.FacilityTypeId = request.FacilityTypeId;
 
             context.Facilities.Update(existingFacility);
             await context.SaveChangesAsync();
@@ -122,7 +125,7 @@ namespace Api.Controllers
         /// <returns>No content.</returns>
         /// <response code="204">If the deletion is successful.</response>
         /// <response code="404">If the facility is not found.</response>
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteFacility(Guid id)

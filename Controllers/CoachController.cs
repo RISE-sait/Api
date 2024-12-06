@@ -1,9 +1,10 @@
+using Api.Attributes;
 using Api.Database;
 using Api.Mappers;
 using Api.Model.People.Staff;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StaffTypeEnum = Api.Enums.StaffType;
 
 namespace Api.Controllers
 {
@@ -11,7 +12,7 @@ namespace Api.Controllers
     /// Handles HTTP requests related to Coach entities.
     /// </summary>
     [ApiController]
-    [Authorize(Policy = "RequireAdmin")]
+    [AuthorizeRoles([StaffTypeEnum.Admin])]
     [Route("api/[controller]")]
     public class CoachController(AppDbContext context, ILogger<CoachController> logger) : ControllerBase
     {
@@ -21,6 +22,7 @@ namespace Api.Controllers
         /// <returns>A list of coaches.</returns>
         /// <response code="200">Returns the list of coaches</response>
         [HttpGet]
+        [AuthorizeRoles([StaffTypeEnum.Coach])]
         [ProducesResponseType(typeof(IEnumerable<StaffResponseDto>), 200)]
         public ActionResult<IEnumerable<StaffResponseDto>> Get()
         {
@@ -35,13 +37,14 @@ namespace Api.Controllers
         /// <returns>The coach with the specified ID.</returns>
         /// <response code="200">Returns the coach with the specified ID</response>
         /// <response code="404">If the coach is not found</response>
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
+        [AuthorizeRoles([StaffTypeEnum.Coach])]
         [ProducesResponseType(typeof(StaffResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetCoachById(Guid id)
+        public IActionResult GetCoachById(Guid id)
         {
 
-            var coach = await context.Staffs.Where(c => c.Id == id).FirstOrDefaultAsync();
+            var coach = context.Staffs.FirstOrDefault(c => c.Id == id);
             if (coach == null)
             {
                 return NotFound();
@@ -71,7 +74,7 @@ namespace Api.Controllers
             try
             {
 
-                Staff coach = createCoachDto.MapToCoach();
+                var coach = createCoachDto.MapToCoach();
 
                 await context.Staffs.AddAsync(coach);
                 await context.SaveChangesAsync();
@@ -88,28 +91,28 @@ namespace Api.Controllers
         /// <summary>
         /// Updates an existing coach.
         /// </summary>
-        /// <param name="id">The ID of the coach to update.</param>
-        /// <param name="coach">The updated coach object.</param>
+        /// <param name="request">The updated coach object.</param>
         /// <returns>The updated coach.</returns>
         /// <response code="200">Returns the updated coach</response>
         /// <response code="400">If the ID in the URL does not match the ID in the coach object</response>
         /// <response code="404">If the coach is not found</response>
         [HttpPut]
+        [AuthorizeRoles([StaffTypeEnum.Coach])]
         [ProducesResponseType(typeof(Staff), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Update(UpdateStaffRequest updateCoachDto)
+        public async Task<IActionResult> Update(UpdateStaffRequest request)
         {
-            var existingCoach = context.Staffs.Where(c => c.Id == updateCoachDto.Id).FirstOrDefault();
+            var existingCoach = context.Staffs.FirstOrDefault(c => c.Id == request.Id);
             if (existingCoach == null)
             {
                 return NotFound(new { Message = "Coach not found" });
             }
 
-            existingCoach.Name = updateCoachDto.Name;
-            existingCoach.PhoneNumber = updateCoachDto.PhoneNumber;
-            existingCoach.ProfilePic = updateCoachDto.ProfilePic;
-            existingCoach.StaffTypeId = updateCoachDto.StaffTypeId;
+            existingCoach.Name = request.Name;
+            existingCoach.PhoneNumber = request.PhoneNumber;
+            existingCoach.ProfilePic = request.ProfilePic;
+            existingCoach.StaffTypeId = request.StaffTypeId;
 
             context.Staffs.Update(existingCoach);
             await context.SaveChangesAsync();
@@ -123,7 +126,7 @@ namespace Api.Controllers
         /// <param name="id">The ID of the coach to delete.</param>
         /// <response code="204">If the coach is successfully deleted</response>
         /// <response code="404">If the coach is not found</response>
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
         public ActionResult Delete(Guid id)

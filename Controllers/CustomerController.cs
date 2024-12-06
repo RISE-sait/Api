@@ -69,14 +69,14 @@
 //     /// <summary>
 //     /// Creates a new customer
 //     /// </summary>
-//     /// <param name="createCustomerDto">The customer data to create</param>
+//     /// <param name="request">The customer data to create</param>
 //     /// <returns>The created customer information</returns>
 //     /// <response code="201">Returns the newly created customer</response>
 //     /// <response code="400">If the model state is invalid</response>
 //     [HttpPost]
 //     [ProducesResponseType(typeof(Customer), StatusCodes.Status201Created)]
 //     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-//     public ActionResult<Customer> Post([FromBody] CreateCustomerRequest createCustomerRequest)
+//     public ActionResult<Customer> Post([FromBody] CreateCustomerRequest request)
 //     {
 //         // Validate the model state
 //         if (!ModelState.IsValid)
@@ -85,7 +85,7 @@
 //         }
 
 //         // Map DTO to Customer entity
-//         var customer = createCustomerRequest.MapToCustomer();
+//         var customer = request.MapToCustomer();
 
 //         // Add customer to database
 //         context.Customers.Add(customer);
@@ -98,7 +98,7 @@
 //     /// Updates specific properties of a customer identified by their email address
 //     /// </summary>
 //     /// <param name="email">The email address of the customer to update</param>
-//     /// <param name="patchCustomerDto">The properties to update</param>
+//     /// <param name="request">The properties to update</param>
 //     /// <returns>The updated customer information</returns>
 //     /// <response code="200">Returns the updated customer</response>
 //     /// <response code="400">If the model state is invalid</response>
@@ -109,7 +109,7 @@
 //     [ProducesResponseType(StatusCodes.Status404NotFound)]
 //     public async Task<ActionResult<Customer>> Put(
 //         [FromRoute] string email,
-//         [FromBody] UpdateCustomerRequest updateCustomerRequest)
+//         [FromBody] UpdateCustomerRequest request)
 //     {
 //         if (!ModelState.IsValid)
 //         {
@@ -128,7 +128,7 @@
 //         try
 //         {
 //             // Update customer properties
-//             UpdateCustomerProperties(customer, updateCustomerRequest);
+//             UpdateCustomerProperties(customer, request);
 //             context.Customers.Update(customer);
 //             await context.SaveChangesAsync();
 
@@ -179,7 +179,7 @@
 //     /// <response code="404">If the customer is not found</response>
 //     [ProducesResponseType(StatusCodes.Status204NoContent)]
 //     [ProducesResponseType(StatusCodes.Status404NotFound)]
-//     [HttpDelete("{id}")]
+//     [HttpDelete("{id:guid}")]
 //     public ActionResult Delete(Guid id)
 //     {
 //         var customer = context.Customers.Find(id);

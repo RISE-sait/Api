@@ -1,14 +1,16 @@
+using Api.Attributes;
 using Api.Database;
 using Api.helpers;
 using Api.Mappers;
 using Api.Model.CourseSchedules;
-using LanguageExt;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StaffTypeEnum = Api.Enums.StaffType;
 
 namespace Api.Controllers
 {
     [ApiController]
+    [AuthorizeRoles([StaffTypeEnum.Admin])]
     [Route("api/[controller]")]
     public class CourseScheduleController(AppDbContext context) : ControllerBase
     {
@@ -16,17 +18,17 @@ namespace Api.Controllers
         /// <summary>
         /// Creates a new course schedule.
         /// </summary>
-        /// <param name="createCourseScheduleDto">The DTO containing the details of the course schedule to create.</param>
+        /// <param name="request">The DTO containing the details of the course schedule to create.</param>
         /// <returns>An IActionResult indicating the result of the operation.</returns>
-        [HttpPost()]
-        public async Task<ActionResult<CourseScheduleResponseDto>> CreateCourseSchedule([FromBody] CreateCourseScheduleRequest createCourseScheduleRequest)
+        [HttpPost]
+        public async Task<ActionResult<CourseScheduleResponseDto>> CreateCourseSchedule([FromBody] CreateCourseScheduleRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var courseSchedule = createCourseScheduleRequest.MapToCourseSchedule();
+            var courseSchedule = request.MapToCourseSchedule();
 
             if (await ScheduleHelper.IsFacilityScheduleOverlapping(context, courseSchedule.MapToCourseScheduleDateTimes()))
             {
@@ -47,7 +49,7 @@ namespace Api.Controllers
         /// <param name="facilityId">The ID of the facility.</param>
         /// <param name="beginTime">The begin time of the course schedule.</param>
         /// <returns>A course schedule if found, otherwise a 404 Not Found response.</returns>
-        [HttpGet()]
+        [HttpGet]
         [ProducesResponseType(typeof(CourseScheduleResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetCourseScheduleById(Guid courseId, DateOnly startDate, Guid facilityId, TimeOnly beginTime)
@@ -74,10 +76,10 @@ namespace Api.Controllers
         /// <param name="startDate">The start date of the course schedule.</param>
         /// <param name="facilityId">The ID of the facility.</param>
         /// <param name="beginTime">The begin time of the course schedule.</param>
-        /// <param name="updateCourseScheduleDto">The DTO containing the updated details of the course schedule.</param>
+        /// <param name="request">The DTO containing the updated details of the course schedule.</param>
         /// <returns>An IActionResult indicating the result of the operation.</returns>
         [HttpPut]
-        public async Task<IActionResult> UpdateCourseSchedule(Guid courseId, DateOnly startDate, Guid facilityId, TimeOnly beginTime, [FromBody] CreateCourseScheduleRequest createCourseScheduleRequest)
+        public async Task<IActionResult> UpdateCourseSchedule(Guid courseId, DateOnly startDate, Guid facilityId, TimeOnly beginTime, [FromBody] CreateCourseScheduleRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -93,14 +95,14 @@ namespace Api.Controllers
                 return NotFound();
             }
 
-            var updatedScheduleInfo = createCourseScheduleRequest.MapToCourseSchedule().MapToCourseScheduleDateTimes();
+            var updatedScheduleInfo = request.MapToCourseSchedule().MapToCourseScheduleDateTimes();
 
             if (await ScheduleHelper.IsFacilityScheduleOverlapping(context, updatedScheduleInfo))
             {
                 return Conflict(new { Message = "The updated course schedule overlaps with an existing schedule." });
             }
 
-            context.Entry(existingCourseSchedule).CurrentValues.SetValues(updatedScheduleInfo);
+            context.Entry(existingCourseSchedule).CurrentValues.SetValues(request);
             await context.SaveChangesAsync();
 
             return NoContent();
@@ -115,7 +117,7 @@ namespace Api.Controllers
         /// <param name="beginTime">The begin time of the course schedule.</param>
         /// <returns>An IActionResult indicating the result of the operation.</returns>
 
-        [HttpDelete()]
+        [HttpDelete]
         public async Task<IActionResult> DeleteCourseSchedule(Guid courseId, DateOnly startDate, Guid facilityId, TimeOnly beginTime)
         {
             var existingCourseSchedule = await context.CourseSchedules

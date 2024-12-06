@@ -21,16 +21,10 @@ namespace Api.Controllers
         [HttpPost("exchange-jwt")]
         public IActionResult Login()
         {
-            if (dbContext == null)
-                return BadRequest("Database context is not available.");
-
             var principal = HttpContext.User;
 
-            if (principal.Identity == null)
-                return BadRequest("Invalid token");
-
-            if (!principal.Identity.IsAuthenticated)
-                return BadRequest("Invalid token");
+            if (!principal.Identity?.IsAuthenticated ?? true)
+                return BadRequest("Invalid token.");
 
             var email = principal.FindFirst(ClaimTypes.Email)?.Value;
 
@@ -38,16 +32,11 @@ namespace Api.Controllers
                 return BadRequest("Invalid token: Email claim not found.");
 
             var staff = dbContext.Staffs.Include(s => s.StaffType).FirstOrDefault(s => s.Email == email);
+
             if (staff == null)
-            {
                 return BadRequest("Invalid token: Staff not found.");
-            }
 
-            var claims = principal.Claims
-                   .Where(c => c.Type != JwtRegisteredClaimNames.Aud)
-                   .ToList();
-
-            claims.Add(new Claim("staffTypeName", staff.StaffType.Name));
+            var claims = principal.Claims.Append(new Claim("staffTypeName", staff.StaffType.Name));
 
             var token = GenerateJwtToken(claims);
 
@@ -65,12 +54,12 @@ namespace Api.Controllers
 
         private string GenerateJwtToken(IEnumerable<Claim> claims)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration[JwtKeyConfig]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration[JwtKeyConfig] ?? throw new InvalidOperationException("JWT key not configured.")));
+
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
                 issuer: configuration[JwtIssuerConfig],
-                audience: configuration[JwtIssuerConfig],
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(30),
                 signingCredentials: creds);

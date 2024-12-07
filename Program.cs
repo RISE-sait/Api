@@ -17,7 +17,7 @@ builder.Configuration
     .AddJsonFile("secrets.json", optional: true, reloadOnChange: true) // Environment-specific settings
     .AddEnvironmentVariables();
 
-var isDevelopment = configuration["Environment"] == "Development";
+var isDevelopment = configuration["Environment:Environment"] == "Development";
 
 // Add services to the container.
 

@@ -29,16 +29,12 @@ namespace Api.Services
                     {
                         var token = context.Request.Cookies["jwtToken"];
                         if (!string.IsNullOrEmpty(token))
-                        {
                             context.Token = token;
-                        }
                         else
                         {
                             var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
                             if (!string.IsNullOrEmpty(authHeader))
-                            {
                                 context.Token = authHeader.Split(" ").Last();
-                            }
                         }
                         return Task.CompletedTask;
                     }

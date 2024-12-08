@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Api.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,11 +24,11 @@ namespace Api.Attributes
                 return;
             
             var user = context.HttpContext.User;
-            var userRole = user.Claims.FirstOrDefault(c => c.Type == "staffTypeName")?.Value;
+            var userRole = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
             
-             if (userRole == StaffType.SuperAdmin)
+            if (userRole == StaffType.SuperAdmin)
                 return; // SuperAdmin is authorized for everything
-             
+            
             var allRoles = context.ActionDescriptor.EndpointMetadata
                  .OfType<AuthorizeRolesAttribute>()
                  .SelectMany(attr => attr.Roles)

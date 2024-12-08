@@ -47,9 +47,7 @@ namespace Api.Controllers
         {
             var facility = await context.Facilities.Where(f => f.Id == id).Include(f => f.FacilityType).FirstOrDefaultAsync();
             if (facility == null)
-            {
                 return NotFound();
-            }
 
             return Ok(facility.MapToFacilityResponseDto());
         }
@@ -67,9 +65,7 @@ namespace Api.Controllers
         public async Task<IActionResult> CreateFacility([FromBody] CreateFacilityRequest createFacilityDto)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
             var facility = createFacilityDto.MapToFacility();
 
@@ -96,17 +92,13 @@ namespace Api.Controllers
         public async Task<IActionResult> UpdateFacility([FromBody] PutFacilityRequest request)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
             var existingFacility = await context.Facilities.Where(f => f.Id == request.FacilityId).FirstOrDefaultAsync();
             var facilityType = await context.FacilityTypes.Where(ft => ft.Id == request.FacilityTypeId).FirstOrDefaultAsync();
 
             if (existingFacility == null || facilityType == null)
-            {
                 return NotFound();
-            }
 
             existingFacility.Name = request.Name;
             existingFacility.Location = request.Location;
@@ -132,10 +124,8 @@ namespace Api.Controllers
         {
             var facility = await context.Facilities.FindAsync(id);
             if (facility == null)
-            {
                 return NotFound();
-            }
-
+            
             context.Facilities.Remove(facility);
             await context.SaveChangesAsync();
             return NoContent();

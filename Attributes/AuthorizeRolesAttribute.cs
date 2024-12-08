@@ -24,6 +24,19 @@ namespace Api.Attributes
                 return;
             
             var user = context.HttpContext.User;
+
+            // Check if the user is authenticated
+            if (!user.Identity?.IsAuthenticated ?? true)
+            {
+                context.Result = new ObjectResult(new ProblemDetails
+                {
+                    Status = StatusCodes.Status401Unauthorized,
+                    Detail = "Invalid or missing token",
+                    Instance = context.HttpContext.Request.Path,
+                });
+                return;
+            }
+            
             var userRole = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
             
             if (userRole == StaffType.SuperAdmin)
@@ -38,8 +51,13 @@ namespace Api.Attributes
             if (userRole != null && allRoles.Contains(userRole)) return;
             
             // Respond with Forbidden if the user role doesn't match
-            context.Result = new ForbidResult();
-            context.HttpContext.Response.Headers.Append("X-Error-Message", $"You must be an {string.Join(" or ", allRoles)} to access this.");
+            
+            context.Result = new ObjectResult(new ProblemDetails
+            {
+                Status = StatusCodes.Status403Forbidden,
+                Detail = $"You must be an {string.Join(" or ", allRoles)} to access this.",
+                Instance = context.HttpContext.Request.Path,
+            });
         }
     }
 }

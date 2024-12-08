@@ -1,5 +1,6 @@
 using Api.Database;
 using Api.helpers;
+using Api.Middlewares;
 using Api.Services;
 using dotenv.net;
 using Scalar.AspNetCore;
@@ -35,10 +36,7 @@ services.AddDbContext<AppDbContext>();
 
 var app = builder.Build();
 
-app.UseAuthentication();
-app.MapControllers();
-
-// Configure the HTTP request pipeline.
+app.MapGet("/", () => "hey");
 
 if (isDevelopment)
 {
@@ -46,7 +44,8 @@ if (isDevelopment)
     app.MapScalarApiReference();
 }
 
-
-app.MapGet("/", () => "hey");
+app.UseAuthentication();
+app.UseMiddleware<JwtExceptionMiddleware>();
+app.MapControllers();
 
 app.Run();

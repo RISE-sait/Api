@@ -103,7 +103,7 @@ namespace Api.Controllers
             var existingFacilityType = await context.FacilityTypes.FindAsync(request.Id);
             if (existingFacilityType == null)
             {
-                return NotFound();
+                return NotFound("Facility type not found.");
             }
 
             existingFacilityType.Name = request.Name;

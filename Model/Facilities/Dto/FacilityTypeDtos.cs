@@ -7,6 +7,6 @@ namespace Api.Model.Facilities.Dto
     );
 
     public sealed record UpdateFacilityTypeDto(
-        [param: Required] Guid Id,
-        [param: Required, MaxLength(30)] string Name);
+        Guid Id,
+        [MaxLength(30)] string Name);
 }

@@ -3,6 +3,7 @@ using System;
 using Api.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241208032755_AddMemberships")]
+    partial class AddMemberships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -203,7 +206,7 @@ namespace Api.Migrations
 
                     b.HasIndex("MembershipId");
 
-                    b.ToTable("MembershipPlans", (string)null);
+                    b.ToTable("MembershipPlan");
                 });
 
             modelBuilder.Entity("Api.Model.People.Customers.Customer", b =>
@@ -388,7 +391,7 @@ namespace Api.Migrations
 
                             b1.HasKey("MembershipPlanId");
 
-                            b1.ToTable("MembershipPlans");
+                            b1.ToTable("MembershipPlan");
 
                             b1.WithOwner()
                                 .HasForeignKey("MembershipPlanId");

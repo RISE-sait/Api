@@ -12,6 +12,7 @@ namespace Api.Database
     {
         public DbSet<Course> Courses { get; init; }
         public DbSet<Membership> Memberships { get; init; }
+        public DbSet<MembershipPlan> MembershipPlans { get; init; }
         public DbSet<CourseSchedule> CourseSchedules { get; init; }
         public DbSet<Staff> Staffs { get; init; }
         public DbSet<StaffType> StaffTypes { get; init; }
@@ -37,6 +38,21 @@ namespace Api.Database
                    cs.FacilityId,
                    cs.BeginTime,
                });
+
+            modelBuilder.Entity<MembershipPlan>()
+            .ToTable("MembershipPlans")
+            .OwnsOne(mp => mp.RecurringPaymentPlan, rp =>
+            {
+                rp.Property(r => r.PaymentFrequency)
+                    .HasColumnName("PaymentFrequency")
+                    .HasConversion(
+                        v => v.ToString(), // Convert enum to string for storage
+                        v => Enum.Parse<PaymentFrequency>(v)); // Convert string back to enum
+
+                rp.Property(r => r.AmtPeriods)
+                    .HasColumnName("AmtPeriods")
+                    .IsRequired(false);
+            });
 
             modelBuilder.Entity<BasicAthleteInfo>().HasOne(ai => ai.Customer)
             .WithOne(c => c.BasicAthleteInfo)

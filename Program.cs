@@ -30,6 +30,7 @@ services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
     options.JsonSerializerOptions.Converters.Add(new GuidJsonConverter());
+    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
 });
 
 services.AddDbContext<AppDbContext>();

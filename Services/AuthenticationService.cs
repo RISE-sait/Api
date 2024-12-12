@@ -6,7 +6,7 @@ namespace Api.Services
 {
     public static class AuthenticationService
     {
-        public readonly static string AUTH_ERROR_KEY = "AuthError";
+        public static string AuthErrorKey = "AuthError";
 
         public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
@@ -42,7 +42,7 @@ namespace Api.Services
                     },
                     OnAuthenticationFailed = context =>
                 {
-                    context.HttpContext.Items[AUTH_ERROR_KEY] = context.Exception;
+                    context.HttpContext.Items[AuthErrorKey] = context.Exception;
                     return Task.CompletedTask;
                 }
                 };

@@ -11,8 +11,8 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRoles([StaffTypeEnum.Admin])]
-    public class FacilityController(AppDbContext context) : ControllerBase
+    // [AuthorizeRoles([StaffTypeEnum.Admin])]
+    public class FacilitiesController(AppDbContext context) : ControllerBase
     {
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace Api.Controllers
         /// <returns>A list of all facilities.</returns>
         /// <response code="200">Returns a list of all facilities.</response>
         [HttpGet]
-        [AuthorizeRoles([StaffTypeEnum.Coach])]
+        // [AuthorizeRoles([StaffTypeEnum.Coach])]
         [ProducesResponseType(typeof(IEnumerable<Facility>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllFacilitiesAsync(int limit = 5)
         {

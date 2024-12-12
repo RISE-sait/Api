@@ -12,10 +12,10 @@ namespace Api.Controllers
     /// Controller for managing courses.
     /// </summary>
     /// <param name="context">The database context.</param>
-    [AuthorizeRoles([StaffTypeEnum.Admin])]
+    // [AuthorizeRoles([StaffTypeEnum.Admin])]
     [ApiController]
     [Route("api/[controller]")]
-    public class CourseController(AppDbContext context) : ControllerBase
+    public class CoursesController(AppDbContext context) : ControllerBase
     {
 
         /// <summary>

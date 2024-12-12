@@ -10,7 +10,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [AuthorizeRoles([StaffTypeEnum.Admin])]
+   // [AuthorizeRoles([StaffTypeEnum.Admin])]
     public class FacilityTypesController(AppDbContext context) : ControllerBase
     {
         /// <summary>
@@ -72,10 +72,11 @@ namespace Api.Controllers
         /// <returns>A list of all facility types.</returns>
         /// <response code="200">Returns a list of all facility types.</response>
         [HttpGet]
-        [AuthorizeRoles([StaffTypeEnum.Coach])]
+       // [AuthorizeRoles([StaffTypeEnum.Coach])]
         [ProducesResponseType(typeof(IEnumerable<FacilityType>), StatusCodes.Status200OK)]
         public IActionResult GetAllFacilityTypes()
         {
+            Console.WriteLine("get all facility types");
             var facilityTypes = context.FacilityTypes.ToList();
             return Ok(facilityTypes);
         }

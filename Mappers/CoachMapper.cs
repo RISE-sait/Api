@@ -13,7 +13,7 @@ namespace Api.Mappers
                 request.StaffTypeId
             );
         }
-
+        
          public static StaffResponseDto MapToCoachResponse(this Staff coach)
         {
             return new StaffResponseDto(

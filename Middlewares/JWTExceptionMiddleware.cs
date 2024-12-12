@@ -6,17 +6,15 @@ namespace Api.Middlewares
 {
     public class JwtExceptionMiddleware(RequestDelegate next)
     {
-        private readonly RequestDelegate _next = next;
-
         public async Task InvokeAsync(HttpContext context)
         {
-            if (context.Items.TryGetValue(AuthenticationService.AUTH_ERROR_KEY, out var error) && error is SecurityTokenException ex)
+            if (context.Items.TryGetValue(AuthenticationService.AuthErrorKey, out var error) && error is SecurityTokenException ex)
             {
                 await HandleExceptionAsync(context, ex);
                 return;
             }
 
-            await _next(context);
+            await next(context);
         }
 
         private static Task HandleExceptionAsync(HttpContext context, SecurityTokenException exception)

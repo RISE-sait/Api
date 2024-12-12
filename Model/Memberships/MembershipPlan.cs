@@ -19,14 +19,14 @@ namespace Api.Model.Memberships
     [Owned]
     public class RecurringPaymentPlan
     {
-        public PaymentFrequency PaymentFrequency { get; set; } = PaymentFrequency.Weekly;
+        public PaymentFrequency PaymentFrequency { get; set; } = PaymentFrequency.week;
         public int? AmtPeriods { get; set; }
     }
 
     public enum PaymentFrequency
     {
-        Weekly,
-        BiWeekly,
-        Monthly,
+        week,
+        month,
+        day
     }
 }

@@ -91,7 +91,6 @@ namespace Api.Controllers
             membership.StartDateTime = request.StartDateTime;
             membership.EndDateTime = request.EndDateTime;
             membership.Description = request.Description;
-            membership.Price = request.Price;
 
             context.Memberships.Update(membership);
             context.SaveChanges();

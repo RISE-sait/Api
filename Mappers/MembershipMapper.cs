@@ -10,7 +10,6 @@ namespace Api.Mappers
                 request.Name,
                 request.StartDateTime,
                 request.EndDateTime,
-                request.Price,
                 request.Description
             );
         }
@@ -21,7 +20,6 @@ namespace Api.Mappers
                 membership.Id,
                 membership.Name,
                 membership.Description,
-                membership.Price,
                 membership.StartDateTime,
                 membership.EndDateTime
             );

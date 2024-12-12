@@ -26,6 +26,7 @@ services.AddAuthentication(configuration);
 services.AddStripeServices(configuration);
 services.AddEndpointsApiExplorer();
 services.AddOpenApi();
+services.AddHttpClient<HubSpotService>();
 services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());

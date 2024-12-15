@@ -20,46 +20,44 @@ namespace Api.Attributes
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             // Skip authorization if the [AllowAnonymous] attribute is present
-            // if (context.ActionDescriptor.EndpointMetadata.OfType<AllowAnonymousAttribute>().Any())
-            //     return;
+            if (context.ActionDescriptor.EndpointMetadata.OfType<AllowAnonymousAttribute>().Any())
+                return;
             
-            // var user = context.HttpContext.User;
+            var user = context.HttpContext.User;
 
-            // // Check if the user is authenticated
-            // if (!user.Identity?.IsAuthenticated ?? true)
-            // {
-            //     context.Result = new ObjectResult(new ProblemDetails
-            //     {
-            //         Status = StatusCodes.Status401Unauthorized,
-            //         Detail = "Invalid or missing token",
-            //         Instance = context.HttpContext.Request.Path,
-            //     });
-            //     return;
-            // }
+            // Check if the user is authenticated
+            if (!user.Identity?.IsAuthenticated ?? true)
+            {
+                context.Result = new ObjectResult(new ProblemDetails
+                {
+                    Status = StatusCodes.Status401Unauthorized,
+                    Detail = "Invalid or missing token",
+                    Instance = context.HttpContext.Request.Path,
+                });
+                return;
+            }
             
-            // var userRole = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            var userRole = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
             
-            // if (userRole == StaffType.SuperAdmin)
-            //     return; // SuperAdmin is authorized for everything
+            if (userRole == StaffType.SuperAdmin)
+                return; // SuperAdmin is authorized for everything
             
-            // var allRoles = context.ActionDescriptor.EndpointMetadata
-            //      .OfType<AuthorizeRolesAttribute>()
-            //      .SelectMany(attr => attr.Roles)
-            //      .Distinct()
-            //      .ToArray();
+            var allRoles = context.ActionDescriptor.EndpointMetadata
+                 .OfType<AuthorizeRolesAttribute>()
+                 .SelectMany(attr => attr.Roles)
+                 .Distinct()
+                 .ToArray();
 
-            // if (userRole != null && allRoles.Contains(userRole)) return;
+            if (userRole != null && allRoles.Contains(userRole)) return;
             
-            // // Respond with Forbidden if the user role doesn't match
+            // Respond with Forbidden if the user role doesn't match
             
-            // context.Result = new ObjectResult(new ProblemDetails
-            // {
-            //     Status = StatusCodes.Status403Forbidden,
-            //     Detail = $"You must be an {string.Join(" or ", allRoles)} to access this.",
-            //     Instance = context.HttpContext.Request.Path,
-            // });
-
-            return;
+            context.Result = new ObjectResult(new ProblemDetails
+            {
+                Status = StatusCodes.Status403Forbidden,
+                Detail = $"You must be an {string.Join(" or ", allRoles)} to access this.",
+                Instance = context.HttpContext.Request.Path,
+            });
         }
     }
 }

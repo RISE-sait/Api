@@ -15,14 +15,21 @@ namespace Api.Controllers
     {
         private const string JwtKeyConfig = "Jwt:Key";
         private const string JwtIssuerConfig = "Jwt:Issuer";
-        
+
         [HttpPost("exchange-jwt")]
         [AllowAnonymous]
         public IActionResult Login()
         {
             try
             {
-                var email = HttpContext.User.FindFirst(ClaimTypes.Email)?.Value;
+                var user = HttpContext.User;
+
+                if (user?.Identity == null || !user.Identity.IsAuthenticated)
+                {
+                    return Unauthorized("Invalid or missing JWT token.");
+                }
+
+                var email = user.FindFirst(ClaimTypes.Email)?.Value;
 
                 if (string.IsNullOrEmpty(email))
                     return BadRequest("JWT token must include an email claim.");
@@ -41,14 +48,6 @@ namespace Api.Controllers
                 var token = GenerateJwtToken(claims);
 
                 return Ok(new { token });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { error = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {

@@ -1,5 +1,6 @@
 using Api.Database;
 using Api.helpers;
+// using Api.Middlewares;
 using Api.Services;
 using dotenv.net;
 using Scalar.AspNetCore;
@@ -46,6 +47,8 @@ if (isDevelopment)
 }
 
 app.UseAuthentication();
+// app.UseMiddleware<JwtExceptionMiddleware>();
+
 app.MapControllers();
 
 app.Run();

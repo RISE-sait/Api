@@ -6,7 +6,7 @@ namespace Api.Services
 {
     public static class AuthenticationService
     {
-        public static string AuthErrorKey = "AuthError";
+        public const string AuthErrorKey = "AuthError";
 
         public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
@@ -25,7 +25,16 @@ namespace Api.Services
                  ValidIssuer = jwtIssuer,
                  IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
              };
+            //  options.Events = new JwtBearerEvents
+            //  {
+            //      OnAuthenticationFailed = context =>
+            //     {
+            //         context.HttpContext.Items[AuthErrorKey] = context.Exception;
+            //         return Task.CompletedTask;
+            //     }
+            //  };
          });
+         
         }
     }
 }

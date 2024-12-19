@@ -1,6 +1,7 @@
 package callback
 
 import (
+	"api/config"
 	"encoding/json"
 	"net/http"
 	"net/url"
@@ -21,7 +22,7 @@ type UserInfo struct {
 	Email string `json:"email"`
 }
 
-func HandleOAuthCallback(w http.ResponseWriter, r *http.Request) {
+func HandleGoogleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the authorization code from the query parameters
 	code := r.URL.Query().Get("code")
 	if code == "" {
@@ -31,14 +32,12 @@ func HandleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare the request to exchange the authorization code for an access token
 	tokenURL := "https://oauth.provider.com/token" // Change to your OAuth provider's token endpoint
-	clientID := "your-client-id"
-	clientSecret := "your-client-secret"
 
 	data := url.Values{
 		"grant_type":    {"authorization_code"},
 		"code":          {code},
-		"client_id":     {clientID},
-		"client_secret": {clientSecret},
+		"client_id":     {config.Envs.GoogleConfig.ClientId},
+		"client_secret": {config.Envs.GoogleConfig.ClientSecret},
 	}
 
 	// Make the request to exchange the authorization code for an access token

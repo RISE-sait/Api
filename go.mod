@@ -12,4 +12,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 )
 
-require golang.org/x/oauth2 v0.24.0 // indirect
+require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
+	golang.org/x/oauth2 v0.24.0 // indirect
+)

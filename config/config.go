@@ -16,8 +16,20 @@ type dbConfig struct {
 	name     string
 }
 
+type googleConfig struct {
+	ClientId     string
+	ClientSecret string
+}
+
+type jwtConfig struct {
+	Secret string
+	Issuer string
+}
+
 type config struct {
 	dbConfig      dbConfig
+	GoogleConfig  googleConfig
+	JwtConfig     jwtConfig
 	HubSpotApiKey string
 }
 
@@ -38,6 +50,14 @@ func initConfig() config {
 			name:     getEnv("DB_NAME", "mydatabase"),
 		},
 		HubSpotApiKey: getEnv("HUBSPOT_API_KEY", ""),
+		GoogleConfig: googleConfig{
+			ClientId:     getEnv("GOOGLE_CLIENT_ID", ""),
+			ClientSecret: getEnv("GOOGLE_CLIENT_SECRET", ""),
+		},
+		JwtConfig: jwtConfig{
+			Secret: getEnv("JWT_SECRET", ""),
+			Issuer: getEnv("JWT_ISSUER", ""),
+		},
 	}
 }
 

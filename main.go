@@ -6,10 +6,10 @@ import (
 	"api/controllers/facilities/facilitiesController"
 	facilitiesTypesController "api/controllers/facilities/facilitiesTypes"
 	"api/controllers/oauth/callback"
+	"api/controllers/products"
 	"api/controllers/schedules"
 	db "api/db/sqlc"
 	"api/middlewares"
-	"api/roles"
 	"api/services"
 	"log"
 	"net/http"
@@ -31,6 +31,7 @@ func main() {
 
 	hubSpotService := services.GetHubSpotService()
 	customersCtrl := customers.NewController(hubSpotService)
+	productsCtrl := products.NewController(hubSpotService)
 
 	router := chi.NewRouter()
 
@@ -39,8 +40,11 @@ func main() {
 
 	registerFacilitiesRoutes(router, facilitiesCtrl)
 	registerFacilitiesTypesRoutes(router, facilitiesTypesCtrl)
-	registerCustomersRoutes(router, customersCtrl)
 	registerSchedulesRoutes(router, schedulesCtrl)
+
+	registerCustomersRoutes(router, customersCtrl)
+	registerProductsRoutes(router, productsCtrl)
+
 	registerAuthRoutes(router)
 
 	// Start the server
@@ -50,7 +54,7 @@ func main() {
 
 func registerFacilitiesRoutes(router *chi.Mux, controller *facilitiesController.FacilitiesController) {
 
-	router.With(middlewares.JWTMiddleware).Route("/api/facilities", func(r chi.Router) {
+	router.Route("/api/facilities", func(r chi.Router) {
 		r.Get("/", controller.GetAllFacilities)
 		r.Post("/", controller.CreateFacility)
 		r.Get("/{id}", controller.GetFacility)
@@ -59,7 +63,7 @@ func registerFacilitiesRoutes(router *chi.Mux, controller *facilitiesController.
 
 func registerFacilitiesTypesRoutes(router *chi.Mux, controller *facilitiesTypesController.FacilityTypesController) {
 
-	router.With(middlewares.JWTMiddleware, middlewares.RoleMiddleware(roles.Admin)).Route("/api/facilities/types", func(r chi.Router) {
+	router.Route("/api/facilities/types", func(r chi.Router) {
 		r.Get("/", controller.GetAllFacilityTypes)
 		r.Post("/", controller.CreateFacilityType)
 		r.Get("/{id}", controller.GetFacilityTypeByID)
@@ -68,21 +72,28 @@ func registerFacilitiesTypesRoutes(router *chi.Mux, controller *facilitiesTypesC
 
 func registerCustomersRoutes(router *chi.Mux, controller *customers.CustomerController) {
 
-	router.With(middlewares.JWTMiddleware).Route("/api/customers", func(r chi.Router) {
+	router.Route("/api/customers", func(r chi.Router) {
 		r.Get("/", controller.GetCustomers)
+	})
+}
+
+func registerProductsRoutes(router *chi.Mux, controller *products.ProductsController) {
+
+	router.Route("/api/products", func(r chi.Router) {
+		r.Get("/", controller.GetProducts)
 	})
 }
 
 func registerAuthRoutes(router *chi.Mux) {
 
-	router.With(middlewares.JWTMiddleware).Route("/oauth/callback/google", func(r chi.Router) {
+	router.Route("/oauth/callback/google", func(r chi.Router) {
 		r.Get("/", callback.HandleGoogleOAuthCallback)
 	})
 }
 
 func registerSchedulesRoutes(router *chi.Mux, controller *schedules.SchedulesController) {
 
-	router.With(middlewares.JWTMiddleware).Route("/api/schedules", func(r chi.Router) {
+	router.Route("/api/schedules", func(r chi.Router) {
 		r.Get("/", controller.GetAllSchedules)
 		r.Post("/", controller.CreateSchedule)
 		r.Get("/{id}", controller.GetScheduleByID)

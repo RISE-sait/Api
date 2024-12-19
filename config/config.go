@@ -73,7 +73,7 @@ func getConnectionString() string {
 }
 
 func GetDBConnection() *sql.DB {
-	connStr := getConnectionString() // Moved connection string logic to config package
+	connStr := getConnectionString()
 	dbConn, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)

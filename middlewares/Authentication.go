@@ -14,7 +14,7 @@ import (
 var secretKey = []byte(config.Envs.JwtConfig.Secret)
 
 // JWT middleware to validate JWT token
-func JWTMiddleware(next http.Handler) http.Handler {
+func AuthenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get the token from the Authorization header
 		authHeader := r.Header.Get("Authorization")
@@ -54,8 +54,11 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			}
 
 			// Store user data and roles in the context
-			ctx := context.WithValue(r.Context(), "user", claims)
-			ctx = context.WithValue(ctx, "role", role)
+			type contextKey string
+			userKey := contextKey("user")
+			roleKey := contextKey("role")
+			ctx := context.WithValue(r.Context(), userKey, claims)
+			ctx = context.WithValue(ctx, roleKey, role)
 			// Pass the context to the next handler
 			next.ServeHTTP(w, r.WithContext(ctx))
 		} else {

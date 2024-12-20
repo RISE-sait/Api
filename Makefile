@@ -1,6 +1,3 @@
-# Use cmd.exe shell for Windows
-SHELL := cmd.exe
-
 # Default migration directory
 MIGRATIONS_DIR=./db/migrations
 
@@ -11,18 +8,27 @@ DB_CONNECTION_STRING=postgresql://postgres:root@localhost:5432/mydatabase?sslmod
 
 # Create a new migration script
 create-migration:
-	$env:GOOSE_DRIVER="postgres"; $env:GOOSE_DBSTRING="postgresql://postgres:root@localhost:5432/mydatabase?sslmode=disable"; goose create create_schedule_table sql -dir ./db/migrations
+	@if (-not "$(name)") { \
+		Write-Host "Migration name is required. Usage: make create-migration name=<migration_name>"; \
+		exit 1; \
+	} else { \
+		$env:GOOSE_DRIVER="postgres"; $env:GOOSE_DBSTRING="postgresql://postgres:root@localhost:5432/mydatabase?sslmode=disable"; goose -dir ./dir/migrations up
+	}
 
 db-up:
-	@echo "Running database migrations..."
-	$env:GOOSE_DRIVER="postgres"; $env:GOOSE_DBSTRING="postgresql://postgres:root@localhost:5432/mydatabase?sslmode=disable"; goose -dir ./dir/migrations up
+	@Write-Host "Running database migrations..."; \
+	$env:GOOSE_DRIVER = "postgres"; \
+	$env:GOOSE_DBSTRING = "$(DB_CONNECTION_STRING)"; \
+	& $(GOOSE) -dir $(MIGRATIONS_DIR) up;
 
-# Rollback last migration (run goose down)
 db-down:
-	@echo "Rolling back last migration..."
-	$(GOOSE) -dir $(MIGRATIONS_DIR) down 1 -env DB_CONNECTION_STRING=$(DB_CONNECTION_STRING)
+	@Write-Host "Rolling back last migration..."; \
+	$env:GOOSE_DRIVER = "postgres"; \
+	$env:GOOSE_DBSTRING = "$(DB_CONNECTION_STRING)"; \
+	& $(GOOSE) -dir $(MIGRATIONS_DIR) down 1;
 
-# Reset the database (run goose reset)
 db-reset:
-	@echo "Resetting database migrations..."
-	$(GOOSE) -dir $(MIGRATIONS_DIR) reset -env DB_CONNECTION_STRING=$(DB_CONNECTION_STRING)
+	@Write-Host "Resetting database migrations..."; \
+	$env:GOOSE_DRIVER = "postgres"; \
+	$env:GOOSE_DBSTRING = "$(DB_CONNECTION_STRING)"; \
+	& $(GOOSE) -dir $(MIGRATIONS_DIR) reset;

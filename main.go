@@ -2,9 +2,11 @@ package main
 
 import (
 	"api/config"
+	"api/controllers/courses"
 	"api/controllers/customers"
 	"api/controllers/facilities/facilitiesController"
 	facilitiesTypesController "api/controllers/facilities/facilitiesTypes"
+	"api/controllers/memberships"
 	"api/controllers/oauth/callback"
 	"api/controllers/products"
 	"api/controllers/schedules"
@@ -28,6 +30,8 @@ func main() {
 	facilitiesCtrl := facilitiesController.NewController(queries)
 	facilitiesTypesCtrl := facilitiesTypesController.NewController(queries)
 	schedulesCtrl := schedules.NewController(queries)
+	membershipsCtrl := memberships.NewController(queries)
+	coursesCtrl := courses.NewController(queries)
 
 	hubSpotService := services.GetHubSpotService()
 	customersCtrl := customers.NewController(hubSpotService)
@@ -41,6 +45,8 @@ func main() {
 	registerFacilitiesRoutes(router, facilitiesCtrl)
 	registerFacilitiesTypesRoutes(router, facilitiesTypesCtrl)
 	registerSchedulesRoutes(router, schedulesCtrl)
+	registerMembershipsRoutes(router, membershipsCtrl)
+	registerCoursesRoutes(router, coursesCtrl)
 
 	registerCustomersRoutes(router, customersCtrl)
 	registerProductsRoutes(router, productsCtrl)
@@ -81,6 +87,28 @@ func registerProductsRoutes(router *chi.Mux, controller *products.ProductsContro
 
 	router.Route("/api/products", func(r chi.Router) {
 		r.Get("/", controller.GetProducts)
+	})
+}
+
+func registerMembershipsRoutes(router *chi.Mux, controller *memberships.MembershipsController) {
+
+	router.Route("/api/memberships", func(r chi.Router) {
+		r.Get("/", controller.GetAllMemberships)
+		r.Get("/{id}", controller.GetMembershipById)
+		r.Post("/", controller.CreateMembership)
+		r.Put("/{id}", controller.UpdateMembership)
+		r.Delete("/{id}", controller.DeleteMembership)
+	})
+}
+
+func registerCoursesRoutes(router *chi.Mux, controller *courses.CoursesController) {
+
+	router.Route("/api/courses", func(r chi.Router) {
+		r.Get("/", controller.GetAllCourses)
+		r.Get("/{id}", controller.GetCourseById)
+		r.Post("/", controller.CreateCourse)
+		r.Put("/{id}", controller.UpdateCourse)
+		r.Delete("/{id}", controller.DeleteCourse)
 	})
 }
 

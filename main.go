@@ -7,8 +7,8 @@ import (
 	"api/controllers/facilities/facilitiesController"
 	facilitiesTypesController "api/controllers/facilities/facilitiesTypes"
 	"api/controllers/memberships"
+	MembershipsPlans "api/controllers/memberships/plans"
 	"api/controllers/oauth/callback"
-	"api/controllers/products"
 	"api/controllers/schedules"
 	db "api/db/sqlc"
 	"api/middlewares"
@@ -32,10 +32,10 @@ func main() {
 	schedulesCtrl := schedules.NewController(queries)
 	membershipsCtrl := memberships.NewController(queries)
 	coursesCtrl := courses.NewController(queries)
+	membershipsPlansCtrl := MembershipsPlans.NewController(queries)
 
 	hubSpotService := services.GetHubSpotService()
 	customersCtrl := customers.NewController(hubSpotService)
-	productsCtrl := products.NewController(hubSpotService)
 
 	router := chi.NewRouter()
 
@@ -47,9 +47,8 @@ func main() {
 	registerSchedulesRoutes(router, schedulesCtrl)
 	registerMembershipsRoutes(router, membershipsCtrl)
 	registerCoursesRoutes(router, coursesCtrl)
-
+	registerMembershipPlanRoutes(router, membershipsPlansCtrl)
 	registerCustomersRoutes(router, customersCtrl)
-	registerProductsRoutes(router, productsCtrl)
 
 	registerAuthRoutes(router)
 
@@ -83,13 +82,6 @@ func registerCustomersRoutes(router *chi.Mux, controller *customers.CustomerCont
 	})
 }
 
-func registerProductsRoutes(router *chi.Mux, controller *products.ProductsController) {
-
-	router.Route("/api/products", func(r chi.Router) {
-		r.Get("/", controller.GetProducts)
-	})
-}
-
 func registerMembershipsRoutes(router *chi.Mux, controller *memberships.MembershipsController) {
 
 	router.Route("/api/memberships", func(r chi.Router) {
@@ -98,6 +90,13 @@ func registerMembershipsRoutes(router *chi.Mux, controller *memberships.Membersh
 		r.Post("/", controller.CreateMembership)
 		r.Put("/{id}", controller.UpdateMembership)
 		r.Delete("/{id}", controller.DeleteMembership)
+	})
+}
+
+func registerMembershipPlanRoutes(router *chi.Mux, controller *MembershipsPlans.MembershipPlansController) {
+	router.Route("/api/memberships/plans", func(r chi.Router) {
+		r.Get("/", controller.GetMembershipPlans)
+		r.Post("/", controller.CreateMembershipPlan)
 	})
 }
 

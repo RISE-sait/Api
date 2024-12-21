@@ -16,10 +16,7 @@ create-migration:
 	}
 
 db-up:
-	@Write-Host "Running database migrations..."; \
-	$env:GOOSE_DRIVER = "postgres"; \
-	$env:GOOSE_DBSTRING = "$(DB_CONNECTION_STRING)"; \
-	& $(GOOSE) -dir $(MIGRATIONS_DIR) up;
+	$env:GOOSE_DRIVER="postgres"; $env:GOOSE_DBSTRING="postgresql://postgres:root@localhost:5432/mydatabase?sslmode=disable"; goose -dir ./db/migrations up
 
 db-down:
 	@Write-Host "Rolling back last migration..."; \

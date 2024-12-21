@@ -20,9 +20,11 @@ func NewController(queries *db.Queries) *FacilityTypesController {
 }
 
 func (ctrl *FacilityTypesController) GetFacilityTypeByID(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
 
-	parsedID, err := uuid.Parse(id)
+	idStr := chi.URLParam(r, "id")
+
+	parsedID, err := uuid.Parse(idStr)
+
 	if err != nil {
 		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
@@ -90,10 +92,11 @@ func (ctrl *FacilityTypesController) CreateFacilityType(w http.ResponseWriter, r
 }
 
 func (ctrl *FacilityTypesController) UpdateFacilityType(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id") // Fetch ID from the route parameter
 
-	// Validate and parse the UUID
-	parsedID, err := uuid.Parse(id)
+	idStr := chi.URLParam(r, "id")
+
+	parsedID, err := uuid.Parse(idStr)
+
 	if err != nil {
 		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return

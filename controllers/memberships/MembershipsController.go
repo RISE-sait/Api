@@ -32,21 +32,23 @@ func (c *MembershipsController) CreateMembership(w http.ResponseWriter, r *http.
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(membership); err != nil {
 		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func (c *MembershipsController) GetMembershipById(w http.ResponseWriter, r *http.Request) {
+
 	idStr := chi.URLParam(r, "id")
-	id, err := uuid.Parse(idStr)
+
+	parsedID, err := uuid.Parse(idStr)
+
 	if err != nil {
 		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
 	}
 
-	membership, err := c.queries.GetMembershipById(context.Background(), id)
+	membership, err := c.queries.GetMembershipById(r.Context(), parsedID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Membership not found", http.StatusNotFound)
@@ -56,7 +58,6 @@ func (c *MembershipsController) GetMembershipById(w http.ResponseWriter, r *http
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(membership); err != nil {
 		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
 	}
@@ -69,7 +70,6 @@ func (c *MembershipsController) GetAllMemberships(w http.ResponseWriter, r *http
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(memberships); err != nil {
 		http.Error(w, "Failed to encode response: "+err.Error(), http.StatusInternalServerError)
 	}
@@ -91,14 +91,17 @@ func (c *MembershipsController) UpdateMembership(w http.ResponseWriter, r *http.
 }
 
 func (c *MembershipsController) DeleteMembership(w http.ResponseWriter, r *http.Request) {
+
 	idStr := chi.URLParam(r, "id")
-	id, err := uuid.Parse(idStr)
+
+	parsedID, err := uuid.Parse(idStr)
+
 	if err != nil {
 		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
 	}
 
-	if err := c.queries.DeleteMembership(context.Background(), id); err != nil {
+	if err := c.queries.DeleteMembership(r.Context(), parsedID); err != nil {
 		http.Error(w, "Failed to delete membership: "+err.Error(), http.StatusInternalServerError)
 		return
 	}

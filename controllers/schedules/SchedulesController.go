@@ -35,13 +35,17 @@ func (c *SchedulesController) GetAllSchedules(w http.ResponseWriter, r *http.Req
 
 // GetScheduleByID retrieves a single schedule by its ID.
 func (c *SchedulesController) GetScheduleByID(w http.ResponseWriter, r *http.Request) {
+
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
+
+	parsedID, err := strconv.Atoi(idStr)
+
 	if err != nil {
-		http.Error(w, "Invalid schedule ID", http.StatusBadRequest)
+		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
 	}
-	schedule, err := c.queries.GetScheduleById(r.Context(), int32(id))
+	schedule, err := c.queries.GetScheduleById(r.Context(), int32(parsedID))
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Schedule not found", http.StatusNotFound)
@@ -95,13 +99,15 @@ func (c *SchedulesController) UpdateSchedule(w http.ResponseWriter, r *http.Requ
 func (c *SchedulesController) DeleteSchedule(w http.ResponseWriter, r *http.Request) {
 
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idStr)
+
+	parsedID, err := strconv.Atoi(idStr)
+
 	if err != nil {
-		http.Error(w, "Invalid schedule ID", http.StatusBadRequest)
+		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
 	}
 
-	deletedCount, err := c.queries.DeleteSchedule(r.Context(), int32(id))
+	deletedCount, err := c.queries.DeleteSchedule(r.Context(), int32(parsedID))
 
 	if deletedCount == 0 {
 		http.Error(w, "Schedule not found", http.StatusNotFound)

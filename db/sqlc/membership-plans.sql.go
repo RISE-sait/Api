@@ -62,12 +62,21 @@ func (q *Queries) DeleteMembershipPlan(ctx context.Context, arg DeleteMembership
 	return err
 }
 
-const getAllMembershipPlans = `-- name: GetAllMembershipPlans :many
-SELECT id, name, price, membership_id, payment_frequency, amt_periods, created_at, updated_at FROM membership_plans
+const getMembershipPlans = `-- name: GetMembershipPlans :many
+SELECT id, name, price, membership_id, payment_frequency, amt_periods, created_at, updated_at 
+FROM membership_plans
+WHERE 
+    ($1::UUID IS NULL OR $1::UUID = '00000000-0000-0000-0000-000000000000' OR membership_id = $1) AND
+    ($2::UUID IS NULL OR $2::UUID = '00000000-0000-0000-0000-000000000000' OR id = $2)
 `
 
-func (q *Queries) GetAllMembershipPlans(ctx context.Context) ([]MembershipPlan, error) {
-	rows, err := q.db.QueryContext(ctx, getAllMembershipPlans)
+type GetMembershipPlansParams struct {
+	Column1 uuid.UUID `json:"column_1"`
+	Column2 uuid.UUID `json:"column_2"`
+}
+
+func (q *Queries) GetMembershipPlans(ctx context.Context, arg GetMembershipPlansParams) ([]MembershipPlan, error) {
+	rows, err := q.db.QueryContext(ctx, getMembershipPlans, arg.Column1, arg.Column2)
 	if err != nil {
 		return nil, err
 	}
@@ -96,31 +105,6 @@ func (q *Queries) GetAllMembershipPlans(ctx context.Context) ([]MembershipPlan, 
 		return nil, err
 	}
 	return items, nil
-}
-
-const getMembershipPlanById = `-- name: GetMembershipPlanById :one
-SELECT id, name, price, membership_id, payment_frequency, amt_periods, created_at, updated_at FROM membership_plans WHERE membership_id = $1 AND id = $2
-`
-
-type GetMembershipPlanByIdParams struct {
-	MembershipID uuid.UUID `json:"membership_id"`
-	ID           uuid.UUID `json:"id"`
-}
-
-func (q *Queries) GetMembershipPlanById(ctx context.Context, arg GetMembershipPlanByIdParams) (MembershipPlan, error) {
-	row := q.db.QueryRowContext(ctx, getMembershipPlanById, arg.MembershipID, arg.ID)
-	var i MembershipPlan
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Price,
-		&i.MembershipID,
-		&i.PaymentFrequency,
-		&i.AmtPeriods,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
 }
 
 const updateMembershipPlan = `-- name: UpdateMembershipPlan :exec

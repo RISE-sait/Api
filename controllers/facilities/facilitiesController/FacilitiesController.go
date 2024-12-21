@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/google/uuid"
 )
 
@@ -40,9 +41,10 @@ func (c *FacilitiesController) CreateFacility(w http.ResponseWriter, r *http.Req
 
 // GetFacility handles retrieving a single facility by its ID
 func (c *FacilitiesController) GetFacility(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	idStr := chi.URLParam(r, "id")
 
-	parsedID, err := uuid.Parse(id)
+	parsedID, err := uuid.Parse(idStr)
+
 	if err != nil {
 		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
@@ -82,9 +84,11 @@ func (c *FacilitiesController) GetAllFacilities(w http.ResponseWriter, _ *http.R
 
 // UpdateFacility handles updating an existing facility
 func (c *FacilitiesController) UpdateFacility(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
 
-	parsedID, err := uuid.Parse(id)
+	idStr := chi.URLParam(r, "id")
+
+	parsedID, err := uuid.Parse(idStr)
+
 	if err != nil {
 		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
@@ -97,7 +101,7 @@ func (c *FacilitiesController) UpdateFacility(w http.ResponseWriter, r *http.Req
 	}
 	req.ID = parsedID
 
-	err = c.queries.UpdateFacility(context.Background(), req)
+	err = c.queries.UpdateFacility(r.Context(), req)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			http.Error(w, "Facility not found", http.StatusNotFound)
@@ -113,15 +117,17 @@ func (c *FacilitiesController) UpdateFacility(w http.ResponseWriter, r *http.Req
 
 // DeleteFacility handles deleting a facility by its ID
 func (c *FacilitiesController) DeleteFacility(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
 
-	parsedID, err := uuid.Parse(id)
+	idStr := chi.URLParam(r, "id")
+
+	parsedID, err := uuid.Parse(idStr)
+
 	if err != nil {
 		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
 	}
 
-	err = c.queries.DeleteFacility(context.Background(), parsedID)
+	err = c.queries.DeleteFacility(r.Context(), parsedID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			http.Error(w, "Facility not found", http.StatusNotFound)

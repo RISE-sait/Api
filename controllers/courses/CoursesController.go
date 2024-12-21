@@ -38,13 +38,15 @@ func (c *CoursesController) CreateCourse(w http.ResponseWriter, r *http.Request)
 
 func (c *CoursesController) GetCourseById(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := uuid.Parse(idStr)
+
+	parsedID, err := uuid.Parse(idStr)
+
 	if err != nil {
 		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
 	}
 
-	course, err := c.queries.GetCourseById(r.Context(), id)
+	course, err := c.queries.GetCourseById(r.Context(), parsedID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Course not found", http.StatusNotFound)
@@ -88,13 +90,15 @@ func (c *CoursesController) UpdateCourse(w http.ResponseWriter, r *http.Request)
 
 func (c *CoursesController) DeleteCourse(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := uuid.Parse(idStr)
+
+	parsedID, err := uuid.Parse(idStr)
+
 	if err != nil {
 		http.Error(w, "Invalid ID format", http.StatusBadRequest)
 		return
 	}
 
-	if err := c.queries.DeleteCourse(r.Context(), id); err != nil {
+	if err := c.queries.DeleteCourse(r.Context(), parsedID); err != nil {
 		http.Error(w, "Failed to delete course: "+err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -8,7 +8,6 @@ import (
 	facilitiesTypesController "api/controllers/facilities/facilitiesTypes"
 	"api/controllers/memberships"
 	MembershipsPlans "api/controllers/memberships/plans"
-	"api/controllers/oauth/callback"
 	"api/controllers/schedules"
 	db "api/db/sqlc"
 	"api/middlewares"
@@ -24,9 +23,32 @@ import (
 func main() {
 
 	// Build the connection string
-	dbConn := config.GetDBConnection()
+	queries, hubSpotService := initDependencies()
 
+	router := chi.NewRouter()
+
+	router.Use(middleware.Logger)
+	router.Use(middlewares.SetJSONContentType)
+
+	registerRoutes(router, queries, hubSpotService)
+
+	// Start the server
+	log.Println("Server started at :8080")
+	log.Fatal(http.ListenAndServe(":8080", router))
+}
+
+func initDependencies() (*db.Queries, *services.HubSpotService) {
+	// Database connection
+	dbConn := config.GetDBConnection()
 	queries := db.New(dbConn)
+
+	// HubSpot service
+	hubSpotService := services.GetHubSpotService()
+
+	return queries, hubSpotService
+}
+
+func registerRoutes(router *chi.Mux, queries *db.Queries, hubSpotService *services.HubSpotService) {
 	facilitiesCtrl := facilitiesController.NewController(queries)
 	facilitiesTypesCtrl := facilitiesTypesController.NewController(queries)
 	schedulesCtrl := schedules.NewController(queries)
@@ -34,97 +56,64 @@ func main() {
 	coursesCtrl := courses.NewController(queries)
 	membershipsPlansCtrl := MembershipsPlans.NewController(queries)
 
-	hubSpotService := services.GetHubSpotService()
 	customersCtrl := customers.NewController(hubSpotService)
 
-	router := chi.NewRouter()
+	apiRoutes := []struct {
+		path   string
+		ctrl   interface{}
+		config func(chi.Router)
+	}{
+		{"/facilities", facilitiesCtrl, func(r chi.Router) {
+			ctrl := facilitiesCtrl
+			r.Get("/", ctrl.GetAllFacilities)
+			r.Post("/", ctrl.CreateFacility)
+			r.Get("/{id}", ctrl.GetFacility)
+		}},
+		{"/facilities/types", facilitiesTypesCtrl, func(r chi.Router) {
+			ctrl := facilitiesTypesCtrl
+			r.Get("/", ctrl.GetAllFacilityTypes)
+			r.Post("/", ctrl.CreateFacilityType)
+			r.Get("/{id}", ctrl.GetFacilityTypeByID)
+		}},
+		{"/customers", customersCtrl, func(r chi.Router) {
+			ctrl := customersCtrl
+			r.Get("/", ctrl.GetCustomers)
+		}},
+		{"/memberships", membershipsCtrl, func(r chi.Router) {
+			ctrl := membershipsCtrl
+			r.Get("/", ctrl.GetAllMemberships)
+			r.Get("/{id}", ctrl.GetMembershipById)
+			r.Post("/", ctrl.CreateMembership)
+			r.Put("/{id}", ctrl.UpdateMembership)
+			r.Delete("/{id}", ctrl.DeleteMembership)
+		}},
+		{"/memberships/plans", membershipsPlansCtrl, func(r chi.Router) {
+			ctrl := membershipsPlansCtrl
+			r.Get("/", ctrl.GetMembershipPlans)
+			r.Post("/", ctrl.CreateMembershipPlan)
+		}},
+		{"/courses", coursesCtrl, func(r chi.Router) {
+			ctrl := coursesCtrl
+			r.Get("/", ctrl.GetAllCourses)
+			r.Get("/{id}", ctrl.GetCourseById)
+			r.Post("/", ctrl.CreateCourse)
+			r.Put("/{id}", ctrl.UpdateCourse)
+			r.Delete("/{id}", ctrl.DeleteCourse)
+		}},
+		{"/schedules", schedulesCtrl, func(r chi.Router) {
+			ctrl := schedulesCtrl
+			r.Get("/", ctrl.GetAllSchedules)
+			r.Post("/", ctrl.CreateSchedule)
+			r.Get("/{id}", ctrl.GetScheduleByID)
+			r.Put("/{id}", ctrl.UpdateSchedule)
+			r.Delete("/{id}", ctrl.DeleteSchedule)
+		}},
+	}
 
-	router.Use(middleware.Logger)
-	router.Use(middlewares.SetJSONContentType)
-
-	registerFacilitiesRoutes(router, facilitiesCtrl)
-	registerFacilitiesTypesRoutes(router, facilitiesTypesCtrl)
-	registerSchedulesRoutes(router, schedulesCtrl)
-	registerMembershipsRoutes(router, membershipsCtrl)
-	registerCoursesRoutes(router, coursesCtrl)
-	registerMembershipPlanRoutes(router, membershipsPlansCtrl)
-	registerCustomersRoutes(router, customersCtrl)
-
-	registerAuthRoutes(router)
-
-	// Start the server
-	log.Println("Server started at :8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
-}
-
-func registerFacilitiesRoutes(router *chi.Mux, controller *facilitiesController.FacilitiesController) {
-
-	router.Route("/api/facilities", func(r chi.Router) {
-		r.Get("/", controller.GetAllFacilities)
-		r.Post("/", controller.CreateFacility)
-		r.Get("/{id}", controller.GetFacility)
-	})
-}
-
-func registerFacilitiesTypesRoutes(router *chi.Mux, controller *facilitiesTypesController.FacilityTypesController) {
-
-	router.Route("/api/facilities/types", func(r chi.Router) {
-		r.Get("/", controller.GetAllFacilityTypes)
-		r.Post("/", controller.CreateFacilityType)
-		r.Get("/{id}", controller.GetFacilityTypeByID)
-	})
-}
-
-func registerCustomersRoutes(router *chi.Mux, controller *customers.CustomerController) {
-
-	router.Route("/api/customers", func(r chi.Router) {
-		r.Get("/", controller.GetCustomers)
-	})
-}
-
-func registerMembershipsRoutes(router *chi.Mux, controller *memberships.MembershipsController) {
-
-	router.Route("/api/memberships", func(r chi.Router) {
-		r.Get("/", controller.GetAllMemberships)
-		r.Get("/{id}", controller.GetMembershipById)
-		r.Post("/", controller.CreateMembership)
-		r.Put("/{id}", controller.UpdateMembership)
-		r.Delete("/{id}", controller.DeleteMembership)
-	})
-}
-
-func registerMembershipPlanRoutes(router *chi.Mux, controller *MembershipsPlans.MembershipPlansController) {
-	router.Route("/api/memberships/plans", func(r chi.Router) {
-		r.Get("/", controller.GetMembershipPlans)
-		r.Post("/", controller.CreateMembershipPlan)
-	})
-}
-
-func registerCoursesRoutes(router *chi.Mux, controller *courses.CoursesController) {
-
-	router.Route("/api/courses", func(r chi.Router) {
-		r.Get("/", controller.GetAllCourses)
-		r.Get("/{id}", controller.GetCourseById)
-		r.Post("/", controller.CreateCourse)
-		r.Put("/{id}", controller.UpdateCourse)
-		r.Delete("/{id}", controller.DeleteCourse)
-	})
-}
-
-func registerAuthRoutes(router *chi.Mux) {
-
-	router.Route("/oauth/callback/google", func(r chi.Router) {
-		r.Get("/", callback.HandleGoogleOAuthCallback)
-	})
-}
-
-func registerSchedulesRoutes(router *chi.Mux, controller *schedules.SchedulesController) {
-
-	router.Route("/api/schedules", func(r chi.Router) {
-		r.Get("/", controller.GetAllSchedules)
-		r.Post("/", controller.CreateSchedule)
-		r.Get("/{id}", controller.GetScheduleByID)
-		r.Put("/{id}", controller.UpdateSchedule)
-		r.Delete("/{id}", controller.DeleteSchedule)
+	// Register routes under the "/api" base path
+	router.Route("/api", func(api chi.Router) {
+		for _, route := range apiRoutes {
+			api.Route(route.path, route.config)
+		}
 	})
 }
